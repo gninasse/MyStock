@@ -1,8 +1,8 @@
-# Keystone Boilerplate 🚀
+# MyStock 🚀
 
-Un template de démarrage moderne basé sur **Laravel 12** structuré en multi-modules, avec support natif de **PostgreSQL**, gestion avancée des permissions (Spatie), journalisation des activités et commandes interactives.
+Application de gestion de stock moderne basée sur **Laravel 12** structurée en multi-modules, avec support natif de **PostgreSQL**, gestion avancée des permissions (Spatie), journalisation des activités et commandes interactives.
 
-Ce dépôt est conçu pour vous permettre de lancer un nouveau projet en quelques minutes seulement.
+Développée à partir du template Keystone Boilerplate.
 
 ---
 
@@ -23,8 +23,8 @@ Suivez ces étapes pour configurer le projet localement.
 ### 1. Cloner le Projet
 Clonez ce dépôt et placez-vous dans son dossier racine :
 ```bash
-git clone <url-du-depot>
-cd Keystone
+git clone https://github.com/gninasse/MyStock.git
+cd MyStock
 ```
 
 ### 2. Configurer l'Environnement
@@ -37,13 +37,13 @@ Ouvrez le fichier `.env` et ajustez les variables liées à votre base de donné
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
 DB_PORT=5432
-DB_DATABASE=votre_base_de_donnees
-DB_USERNAME=votre_utilisateur
-DB_PASSWORD=votre_mot_de_passe
+DB_DATABASE=mystock
+DB_USERNAME=mystock
+DB_PASSWORD=mystock
 ```
 
 > [!NOTE]
-> L'URL de l'application est configurée par défaut sur `https://keystone.local`. Si vous utilisez un nom de domaine ou un port local différent, mettez à jour la clé `APP_URL`.
+> L'URL de l'application est configurée par défaut sur `http://mystock.local`. Si vous utilisez un nom de domaine ou un port local différent, mettez à jour la clé `APP_URL`.
 
 ---
 
@@ -52,15 +52,15 @@ DB_PASSWORD=votre_mot_de_passe
 Vous avez deux méthodes pour initialiser le schéma et les données initiales de la base de données.
 
 #### Option A : Importer le script SQL (Recommandé pour un démarrage immédiat)
-Un script de base de données complet et portable contenant la structure et les configurations est disponible dans [database/sql/init.sql](file:///home/ibrahim/projets/web/Keystone/database/sql/init.sql).
+Un script de base de données complet et portable contenant la structure et les configurations est disponible dans [database/sql/init.sql](file:///home/ibrahim/projets/web/MyStock/database/sql/init.sql).
 
 Créez votre base de données dans PostgreSQL, puis importez le fichier :
 ```bash
 # Se connecter à PostgreSQL et créer la base de données
-createdb -U votre_utilisateur -h 127.0.0.1 -p 5432 votre_base_de_donnees
+createdb -U postgres mystock
 
 # Importer le script SQL d'initialisation
-psql -U votre_utilisateur -h 127.0.0.1 -p 5432 -d votre_base_de_donnees -f database/sql/init.sql
+psql -U postgres -d mystock -f database/sql/init.sql
 ```
 
 #### Option B : Exécuter les Migrations et Seeders de Laravel
@@ -139,29 +139,22 @@ php artisan cores:make-superadmin votre.email@exemple.com
 
 ## 🌐 Configuration du Virtual Host
 
-Pour faire tourner le projet sous l'adresse locale `https://keystone.local`, configurez votre serveur web.
+Pour faire tourner le projet sous l'adresse locale `http://mystock.local`, configurez votre serveur web.
 
 ### 🌐 Ajouter la Résolution DNS Locale
 Éditez votre fichier d'hôtes système (ex: `/etc/hosts` sous Linux/macOS ou `C:\Windows\System32\drivers\etc\hosts` sous Windows) et ajoutez :
 ```text
-127.0.0.1    keystone.local
+127.0.0.1    mystock.local
 ```
 
 ### Nginx (Recommandé)
-Créez un fichier de configuration pour le site sous `/etc/nginx/sites-available/keystone.local` :
+Créez un fichier de configuration pour le site sous `/etc/nginx/sites-available/mystock.local` :
 ```nginx
 server {
     listen 80;
     listen [::]:80;
-    server_name keystone.local;
-    return 301 https://$server_name$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    server_name keystone.local;
-    root /home/ibrahim/projets/web/Keystone/public;
+    server_name mystock.local;
+    root /home/ibrahim/projets/web/MyStock/public;
 
     add_header X-Frame-Options "SAMEORIGIN";
     add_header X-Content-Type-Options "nosniff";

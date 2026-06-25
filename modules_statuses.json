@@ -1,3 +1,6 @@
 {
-    "Core": true
+    "Core": true,
+    "Inventory": true,
+    "Organization": true,
+    "Reporting": true
 }
