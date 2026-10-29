@@ -13,7 +13,7 @@
 <div class="login-box">
     <div class="card card-outline card-primary">
         <div class="card-header text-center">
-            <a href="#" class="h1"><b>KEYSTONE</b></a>
+            <a href="#" class="h1"><b>MYSTOCK</b></a>
         </div>
         <div class="card-body">
             <p class="login-box-msg">Connectez-vous pour ouvrir votre session</p>

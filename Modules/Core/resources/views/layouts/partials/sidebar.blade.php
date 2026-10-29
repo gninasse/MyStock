@@ -34,7 +34,7 @@
                 <a href="#" class="nav-link active">
                   <i class="nav-icon bi bi-speedometer"></i>
                   <p>
-                    KEYSTONE
+                    MYSTOCK
                     <i class="nav-arrow bi bi-chevron-right"></i>
                   </p>
                 </a>

@@ -1,4 +1,4 @@
-# Keystone Boilerplate 🚀
+# MyStock Boilerplate 🚀
 
 Un template de démarrage moderne basé sur **Laravel 12** structuré en multi-modules, avec support natif de **PostgreSQL**, gestion avancée des permissions (Spatie), journalisation des activités et commandes interactives.
 
@@ -24,11 +24,11 @@ Suivez ces étapes pour configurer le projet localement.
 Clonez ce dépôt et placez-vous dans son dossier racine :
 ```bash
 git clone <url-du-depot>
-cd Keystone
+cd MyStock
 ```
 
 ### 2. Configurer l'Environnement
-Copiez le fichier de configuration exemple [.env.example](file:///home/ibrahim/projets/web/Keystone/.env.example) pour créer votre fichier `.env` :
+Copiez le fichier de configuration exemple [.env.example](file:///home/ibrahim/projets/web/MyStock/.env.example) pour créer votre fichier `.env` :
 ```bash
 cp .env.example .env
 ```
@@ -43,7 +43,7 @@ DB_PASSWORD=votre_mot_de_passe
 ```
 
 > [!NOTE]
-> L'URL de l'application est configurée par défaut sur `https://keystone.local`. Si vous utilisez un nom de domaine ou un port local différent, mettez à jour la clé `APP_URL`.
+> L'URL de l'application est configurée par défaut sur `https://mystock.local`. Si vous utilisez un nom de domaine ou un port local différent, mettez à jour la clé `APP_URL`.
 
 ---
 
@@ -52,7 +52,7 @@ DB_PASSWORD=votre_mot_de_passe
 Vous avez deux méthodes pour initialiser le schéma et les données initiales de la base de données.
 
 #### Option A : Importer le script SQL (Recommandé pour un démarrage immédiat)
-Un script de base de données complet et portable contenant la structure et les configurations est disponible dans [database/sql/init.sql](file:///home/ibrahim/projets/web/Keystone/database/sql/init.sql).
+Un script de base de données complet et portable contenant la structure et les configurations est disponible dans [database/sql/init.sql](file:///home/ibrahim/projets/web/MyStock/database/sql/init.sql).
 
 Créez votre base de données dans PostgreSQL, puis importez le fichier :
 ```bash
@@ -124,7 +124,7 @@ chown -R www-data:www-data storage bootstrap/cache
 Pour commencer le développement, vous devez créer un compte utilisateur de type administrateur. Le projet intègre des commandes interactives pour vous guider :
 
 ### Étape 1 : Créer l'utilisateur interactivement
-Lancez la commande interactive [CreateUserCommand.php](file:///home/ibrahim/projets/web/Keystone/Modules/Core/app/Console/Commands/CreateUserCommand.php) pour saisir les informations de l'utilisateur et lui attribuer un rôle initial s'il existe :
+Lancez la commande interactive [CreateUserCommand.php](file:///home/ibrahim/projets/web/MyStock/Modules/Core/app/Console/Commands/CreateUserCommand.php) pour saisir les informations de l'utilisateur et lui attribuer un rôle initial s'il existe :
 ```bash
 php artisan cores:create-user
 ```
@@ -139,29 +139,29 @@ php artisan cores:make-superadmin votre.email@exemple.com
 
 ## 🌐 Configuration du Virtual Host
 
-Pour faire tourner le projet sous l'adresse locale `https://keystone.local`, configurez votre serveur web.
+Pour faire tourner le projet sous l'adresse locale `https://mystock.local`, configurez votre serveur web.
 
 ### 🌐 Ajouter la Résolution DNS Locale
 Éditez votre fichier d'hôtes système (ex: `/etc/hosts` sous Linux/macOS ou `C:\Windows\System32\drivers\etc\hosts` sous Windows) et ajoutez :
 ```text
-127.0.0.1    keystone.local
+127.0.0.1    mystock.local
 ```
 
 ### Nginx (Recommandé)
-Créez un fichier de configuration pour le site sous `/etc/nginx/sites-available/keystone.local` :
+Créez un fichier de configuration pour le site sous `/etc/nginx/sites-available/mystock.local` :
 ```nginx
 server {
     listen 80;
     listen [::]:80;
-    server_name keystone.local;
+    server_name mystock.local;
     return 301 https://$server_name$request_uri;
 }
 
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    server_name keystone.local;
-    root /home/ibrahim/projets/web/Keystone/public;
+    server_name mystock.local;
+    root /home/ibrahim/projets/web/MyStock/public;
 
     add_header X-Frame-Options "SAMEORIGIN";
     add_header X-Content-Type-Options "nosniff";
@@ -196,32 +196,32 @@ server {
 ```
 Activez la configuration et redémarrez Nginx :
 ```bash
-sudo ln -s /etc/nginx/sites-available/keystone.local /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/mystock.local /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
 ```
 
 ### Apache
-Créez une configuration d'hôte virtuel Apache sous `/etc/apache2/sites-available/keystone.local.conf` :
+Créez une configuration d'hôte virtuel Apache sous `/etc/apache2/sites-available/mystock.local.conf` :
 ```xml
 <VirtualHost *:80>
-    ServerName keystone.local
+    ServerName mystock.local
     ServerAdmin webmaster@localhost
-    DocumentRoot /home/ibrahim/projets/web/Keystone/public
+    DocumentRoot /home/ibrahim/projets/web/MyStock/public
 
-    <Directory /home/ibrahim/projets/web/Keystone/public>
+    <Directory /home/ibrahim/projets/web/MyStock/public>
         Options Indexes FollowSymLinks MultiViews
         AllowOverride All
         Require all granted
     </Directory>
 
-    ErrorLog ${APACHE_LOG_DIR}/keystone_error.log
-    CustomLog ${APACHE_LOG_DIR}/keystone_access.log combined
+    ErrorLog ${APACHE_LOG_DIR}/mystock_error.log
+    CustomLog ${APACHE_LOG_DIR}/mystock_access.log combined
 </VirtualHost>
 ```
 Activez le site et le module de réécriture, puis redémarrez Apache :
 ```bash
-sudo a2ensite keystone.local.conf
+sudo a2ensite mystock.local.conf
 sudo a2enmod rewrite
 sudo systemctl restart apache2
 ```
@@ -244,4 +244,4 @@ Le module **Core** met à votre disposition plusieurs commandes artisan sous le 
 
 ---
 
-Développement agréable et productif avec **Keystone Boilerplate** ! 💻⚙️
+Développement agréable et productif avec **MyStock Boilerplate** ! 💻⚙️
