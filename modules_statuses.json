@@ -1,5 +1,6 @@
 {
     "Core": true,
     "Referentiel": true,
-    "Stock": true
+    "Stock": true,
+    "Etats": true
 }

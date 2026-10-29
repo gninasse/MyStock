@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/etats",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Etats\\": "app/",
+            "Modules\\Etats\\Database\\Factories\\": "database/factories/",
+            "Modules\\Etats\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Etats\\Tests\\": "tests/"
+        }
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "name": "Etats",
+    "alias": "etats",
+    "description": "États et rapports de MyStock : stock par magasin et par catégorie, journal des mouvements, fiche de stock, exports Excel / PDF, tableau de bord et alertes de stock minimum.",
+    "keywords": [
+        "etat",
+        "rapport",
+        "export",
+        "tableau de bord",
+        "alerte"
+    ],
+    "priority": 3,
+    "providers": [
+        "Modules\\Etats\\Providers\\EtatsServiceProvider"
+    ],
+    "version": "1.0.0",
+    "requires": ["Core", "Referentiel", "Stock"],
+    "icon": "fas fa-chart-bar",
+    "files": []
+}

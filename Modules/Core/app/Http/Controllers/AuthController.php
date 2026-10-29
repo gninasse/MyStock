@@ -11,7 +11,7 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
-            return redirect()->route('cores.dashboard');
+            return redirect('/');
         }
 
         return view('core::auth.login');
@@ -32,7 +32,7 @@ class AuthController extends Controller
         if (Auth::attempt([$field => $login, 'password' => $password, 'is_active' => true], true)) {
             $request->session()->regenerate();
 
-            return redirect()->intended(route('cores.dashboard'));
+            return redirect()->intended('/');
         }
 
         // Return with a generic error message key 'login_error' instead of field-specific errors

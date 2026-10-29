@@ -30,20 +30,30 @@
               data-accordion="false"
               id="navigation"
             >
-              <li class="nav-item menu-open">
-                <a href="#" class="nav-link active">
-                  <i class="nav-icon bi bi-speedometer"></i>
+              @can('cores.dashboard.view')
+              <li class="nav-item">
+                <a href="{{ route('etats.tableau-de-bord') }}" class="nav-link {{ request()->routeIs('etats.tableau-de-bord') ? 'active' : '' }}">
+                  <i class="nav-icon bi bi-house"></i>
+                  <p>Tableau de bord</p>
+                </a>
+              </li>
+              @endcan
+              @canany(['cores.users.index', 'cores.roles.index', 'cores.permissions.index', 'cores.modules.index', 'cores.activities.index'])
+              <li class="nav-item {{ request()->routeIs('cores.*') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ request()->routeIs('cores.*') ? 'active' : '' }}">
+                  <i class="nav-icon bi bi-gear"></i>
                   <p>
-                    MYSTOCK
+                    Administration
                     <i class="nav-arrow bi bi-chevron-right"></i>
                   </p>
                 </a>
                 <ul class="nav nav-treeview">
-                  @can('cores.dashboard.view')
+                  {{-- Tableau de bord technique du boilerplate : réservé à l'administration système --}}
+                  @can('cores.modules.index')
                   <li class="nav-item">
                     <a href="{{ route('cores.dashboard') }}" class="nav-link {{ request()->routeIs('cores.dashboard') ? 'active' : '' }}">
                       <i class="nav-icon bi bi-speedometer2"></i>
-                      <p>Dashboard</p>
+                      <p>Tableau de bord système</p>
                     </a>
                   </li>
                   @endcan
@@ -83,18 +93,22 @@
                   <li class="nav-item">
                     <a href="{{ route('cores.activities.index') }}" class="nav-link {{ request()->routeIs('cores.activities.*') ? 'active' : '' }}">
                       <i class="nav-icon bi bi-clock-history"></i>
-                      <p>Activités</p>
+                      <p>Journal d'audit</p>
                     </a>
                   </li>
                   @endcan
                 </ul>
               </li>
+              @endcanany
               @canany(['stock.entrees.saisir', 'stock.sorties.saisir', 'stock.documents.index'])
-              <li class="nav-item {{ request()->routeIs('stock.*') ? 'menu-open' : '' }}">
-                <a href="#" class="nav-link {{ request()->routeIs('stock.*') ? 'active' : '' }}">
+              <li class="nav-item {{ request()->routeIs('stock.saisie.*', 'stock.documents.*') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ request()->routeIs('stock.saisie.*', 'stock.documents.*') ? 'active' : '' }}">
                   <i class="nav-icon bi bi-arrow-left-right"></i>
                   <p>
                     Mouvements
+                    @if ($nombreAlertesStock ?? 0)
+                      <span class="nav-badge badge text-bg-danger me-3" title="Articles sous le seuil minimum">{{ $nombreAlertesStock }}</span>
+                    @endif
                     <i class="nav-arrow bi bi-chevron-right"></i>
                   </p>
                 </a>
@@ -151,6 +165,51 @@
                 </ul>
               </li>
               @endcan
+              @canany(['etats.stock-magasin', 'etats.stock-categorie', 'etats.journal', 'etats.fiche-stock'])
+              <li class="nav-item {{ request()->routeIs('etats.stock-*', 'etats.journal', 'etats.fiche-stock') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ request()->routeIs('etats.stock-*', 'etats.journal', 'etats.fiche-stock') ? 'active' : '' }}">
+                  <i class="nav-icon bi bi-bar-chart"></i>
+                  <p>
+                    États
+                    <i class="nav-arrow bi bi-chevron-right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  @can('etats.stock-magasin')
+                  <li class="nav-item">
+                    <a href="{{ route('etats.stock-magasin') }}" class="nav-link {{ request()->routeIs('etats.stock-magasin') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-shop-window"></i>
+                      <p>Stock par magasin</p>
+                    </a>
+                  </li>
+                  @endcan
+                  @can('etats.stock-categorie')
+                  <li class="nav-item">
+                    <a href="{{ route('etats.stock-categorie') }}" class="nav-link {{ request()->routeIs('etats.stock-categorie') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-tags"></i>
+                      <p>Stock par catégorie</p>
+                    </a>
+                  </li>
+                  @endcan
+                  @can('etats.journal')
+                  <li class="nav-item">
+                    <a href="{{ route('etats.journal') }}" class="nav-link {{ request()->routeIs('etats.journal') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-journal-text"></i>
+                      <p>Journal des mouvements</p>
+                    </a>
+                  </li>
+                  @endcan
+                  @can('etats.fiche-stock')
+                  <li class="nav-item">
+                    <a href="{{ route('etats.fiche-stock') }}" class="nav-link {{ request()->routeIs('etats.fiche-stock') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-file-earmark-text"></i>
+                      <p>Fiche de stock</p>
+                    </a>
+                  </li>
+                  @endcan
+                </ul>
+              </li>
+              @endcanany
               @canany(['referentiel.magasins.index', 'referentiel.structures.index', 'referentiel.categories.index', 'referentiel.articles.index', 'referentiel.articles-frequents.manage'])
               <li class="nav-item {{ request()->routeIs('referentiel.*') ? 'menu-open' : '' }}">
                 <a href="#" class="nav-link {{ request()->routeIs('referentiel.*') ? 'active' : '' }}">
