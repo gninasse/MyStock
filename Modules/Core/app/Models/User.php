@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Models;
 
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -58,6 +59,11 @@ class User extends Authenticatable
             'is_active' => 'boolean',
             'avatar' => 'string',
         ];
+    }
+
+    protected static function newFactory(): UserFactory
+    {
+        return UserFactory::new();
     }
 
     // Accessor pour le nom complet
