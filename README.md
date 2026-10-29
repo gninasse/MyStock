@@ -202,15 +202,32 @@ sudo systemctl restart nginx
 ```
 
 ### Apache
-Créez une configuration d'hôte virtuel Apache sous `/etc/apache2/sites-available/mystock.local.conf` :
+Générez un certificat auto-signé pour `mystock.local`, puis installez-le :
+```bash
+openssl req -x509 -nodes -newkey rsa:2048 -days 825 \
+  -keyout mystock.local.key -out mystock.local.crt \
+  -subj "/CN=mystock.local" -addext "subjectAltName=DNS:mystock.local"
+sudo install -m 644 mystock.local.crt /etc/ssl/certs/mystock.local.crt
+sudo install -m 600 mystock.local.key /etc/ssl/private/mystock.local.key
+```
+
+Créez l'hôte virtuel `/etc/apache2/sites-available/mystock.local.conf` (HTTP redirigé vers HTTPS) :
 ```xml
 <VirtualHost *:80>
     ServerName mystock.local
-    ServerAdmin webmaster@localhost
+    Redirect permanent / https://mystock.local/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName mystock.local
     DocumentRoot /home/ibrahim/projets/web/MyStock/public
 
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/mystock.local.crt
+    SSLCertificateKeyFile /etc/ssl/private/mystock.local.key
+
     <Directory /home/ibrahim/projets/web/MyStock/public>
-        Options Indexes FollowSymLinks MultiViews
+        Options FollowSymLinks
         AllowOverride All
         Require all granted
     </Directory>
@@ -219,11 +236,16 @@ Créez une configuration d'hôte virtuel Apache sous `/etc/apache2/sites-availab
     CustomLog ${APACHE_LOG_DIR}/mystock_access.log combined
 </VirtualHost>
 ```
-Activez le site et le module de réécriture, puis redémarrez Apache :
+Activez le site et les modules, puis rechargez Apache :
 ```bash
 sudo a2ensite mystock.local.conf
-sudo a2enmod rewrite
-sudo systemctl restart apache2
+sudo a2enmod ssl rewrite headers
+sudo systemctl reload apache2
+```
+
+Apache tourne sous `www-data` : donnez-lui l'écriture sur `storage` et `bootstrap/cache` (ACL, sans changer de propriétaire) :
+```bash
+setfacl -R -m u:www-data:rwX -m d:u:www-data:rwX storage bootstrap/cache
 ```
 
 ---
