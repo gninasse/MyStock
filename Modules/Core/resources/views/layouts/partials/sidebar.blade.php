@@ -89,7 +89,59 @@
                   @endcan
                 </ul>
               </li>
-               
+              @canany(['referentiel.magasins.index', 'referentiel.structures.index', 'referentiel.categories.index', 'referentiel.articles.index', 'referentiel.articles-frequents.manage'])
+              <li class="nav-item {{ request()->routeIs('referentiel.*') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ request()->routeIs('referentiel.*') ? 'active' : '' }}">
+                  <i class="nav-icon bi bi-boxes"></i>
+                  <p>
+                    Référentiels
+                    <i class="nav-arrow bi bi-chevron-right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  @can('referentiel.magasins.index')
+                  <li class="nav-item">
+                    <a href="{{ route('referentiel.magasins.index') }}" class="nav-link {{ request()->routeIs('referentiel.magasins.*') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-shop"></i>
+                      <p>Magasins</p>
+                    </a>
+                  </li>
+                  @endcan
+                  @can('referentiel.structures.index')
+                  <li class="nav-item">
+                    <a href="{{ route('referentiel.structures.index') }}" class="nav-link {{ request()->routeIs('referentiel.structures.*') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-diagram-3"></i>
+                      <p>Structures</p>
+                    </a>
+                  </li>
+                  @endcan
+                  @can('referentiel.categories.index')
+                  <li class="nav-item">
+                    <a href="{{ route('referentiel.categories.index') }}" class="nav-link {{ request()->routeIs('referentiel.categories.*') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-tags"></i>
+                      <p>Catégories</p>
+                    </a>
+                  </li>
+                  @endcan
+                  @can('referentiel.articles.index')
+                  <li class="nav-item">
+                    <a href="{{ route('referentiel.articles.index') }}" class="nav-link {{ request()->routeIs('referentiel.articles.*') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-box"></i>
+                      <p>Articles</p>
+                    </a>
+                  </li>
+                  @endcan
+                  @can('referentiel.articles-frequents.manage')
+                  <li class="nav-item">
+                    <a href="{{ route('referentiel.articles-frequents.index') }}" class="nav-link {{ request()->routeIs('referentiel.articles-frequents.*') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-star"></i>
+                      <p>Articles fréquents</p>
+                    </a>
+                  </li>
+                  @endcan
+                </ul>
+              </li>
+              @endcanany
             </ul>
             <!--end::Sidebar Menu-->
           </nav>

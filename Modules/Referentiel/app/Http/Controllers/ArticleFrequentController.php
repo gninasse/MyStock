@@ -41,7 +41,7 @@ class ArticleFrequentController extends Controller
         $maximum = config('referentiel.articles_frequents_max');
 
         $data = $request->validate([
-            'article_ids' => ['present', 'array', "max:{$maximum}"],
+            'article_ids' => ['nullable', 'array', "max:{$maximum}"],
             'article_ids.*' => ['integer', 'distinct', 'exists:articles,id'],
         ], [
             'article_ids.max' => "Un magasin ne peut pas avoir plus de {$maximum} articles fréquents.",
@@ -49,7 +49,7 @@ class ArticleFrequentController extends Controller
         ]);
 
         $avant = $magasin->articlesFrequents()->pluck('articles.id')->all();
-        $apres = array_values($data['article_ids']);
+        $apres = array_values($data['article_ids'] ?? []);
 
         $magasin->articlesFrequents()->sync(
             collect($apres)->mapWithKeys(fn ($id, $index) => [$id => ['ordre' => $index + 1]])->all()
