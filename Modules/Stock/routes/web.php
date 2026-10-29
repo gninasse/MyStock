@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Stock\Http\Controllers\DocumentController;
+use Modules\Stock\Http\Controllers\InventaireController;
 use Modules\Stock\Http\Controllers\SaisieController;
 
 Route::middleware(['auth'])->prefix('stock')->name('stock.')->group(function () {
@@ -20,6 +21,15 @@ Route::middleware(['auth'])->prefix('stock')->name('stock.')->group(function () 
 
     Route::get('/{type}/nouvelle', [DocumentController::class, 'creer'])->whereIn('type', ['entrees', 'sorties'])->name('saisie.create');
     Route::post('/{type}', [DocumentController::class, 'store'])->whereIn('type', ['entrees', 'sorties'])->name('saisie.store');
+
+    Route::prefix('inventaires')->name('inventaires.')->middleware('permission:stock.inventaires.saisir')->group(function () {
+        Route::get('/', [InventaireController::class, 'index'])->name('index');
+        Route::get('/data', [InventaireController::class, 'getData'])->name('data');
+        Route::get('/nouveau', [InventaireController::class, 'create'])->name('create');
+        Route::get('/magasins/{id}/articles', [InventaireController::class, 'articles'])->name('articles');
+        Route::post('/', [InventaireController::class, 'store'])->name('store');
+        Route::get('/{id}', [InventaireController::class, 'show'])->whereNumber('id')->name('show');
+    });
 
     Route::middleware('permission:stock.entrees.saisir|stock.sorties.saisir')->group(function () {
         Route::get('/magasins/{id}/articles-frequents', [SaisieController::class, 'articlesFrequents'])->name('saisie.articles-frequents');

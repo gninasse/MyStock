@@ -86,6 +86,11 @@ class Document extends Model
         return $this->hasOne(self::class, 'document_annule_id');
     }
 
+    public function inventaire(): HasOne
+    {
+        return $this->hasOne(Inventaire::class);
+    }
+
     public function estBrouillon(): bool
     {
         return $this->statut === self::BROUILLON;

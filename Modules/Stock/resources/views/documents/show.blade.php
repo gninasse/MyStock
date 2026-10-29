@@ -34,6 +34,10 @@
             @if ($document->validated_at)
                 <dt class="col-sm-3">Validé par</dt><dd class="col-sm-9">{{ $document->validateur?->full_name }} le {{ $document->validated_at->format('d/m/Y H:i:s') }}</dd>
             @endif
+            @if ($document->inventaire)
+                <dt class="col-sm-3">Inventaire</dt>
+                <dd class="col-sm-9"><a href="{{ route('stock.inventaires.show', $document->inventaire->id) }}">Inventaire du {{ $document->inventaire->date_inventaire->format('d/m/Y') }}</a></dd>
+            @endif
             @if ($document->documentAnnule)
                 <dt class="col-sm-3">Annule</dt>
                 <dd class="col-sm-9"><a href="{{ route('stock.documents.show', $document->documentAnnule->id) }}">{{ $document->documentAnnule->reference }}</a></dd>

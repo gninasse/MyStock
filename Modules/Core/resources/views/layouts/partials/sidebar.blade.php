@@ -126,6 +126,31 @@
                 </ul>
               </li>
               @endcanany
+              @can('stock.inventaires.saisir')
+              <li class="nav-item {{ request()->routeIs('stock.inventaires.*') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ request()->routeIs('stock.inventaires.*') ? 'active' : '' }}">
+                  <i class="nav-icon bi bi-clipboard-check"></i>
+                  <p>
+                    Inventaire
+                    <i class="nav-arrow bi bi-chevron-right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="{{ route('stock.inventaires.create') }}" class="nav-link {{ request()->routeIs('stock.inventaires.create') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-pencil-square"></i>
+                      <p>Saisir un inventaire</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="{{ route('stock.inventaires.index') }}" class="nav-link {{ request()->routeIs('stock.inventaires.index', 'stock.inventaires.show') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-list-check"></i>
+                      <p>Liste des inventaires</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              @endcan
               @canany(['referentiel.magasins.index', 'referentiel.structures.index', 'referentiel.categories.index', 'referentiel.articles.index', 'referentiel.articles-frequents.manage'])
               <li class="nav-item {{ request()->routeIs('referentiel.*') ? 'menu-open' : '' }}">
                 <a href="#" class="nav-link {{ request()->routeIs('referentiel.*') ? 'active' : '' }}">

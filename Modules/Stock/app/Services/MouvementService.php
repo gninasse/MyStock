@@ -135,6 +135,35 @@ class MouvementService
     }
 
     /**
+     * Document d'ajustement validé immédiatement (SFD 8.3) : $ecarts = [article_id => écart non nul].
+     * À appeler dans une transaction où les stocks concernés sont déjà verrouillés.
+     */
+    public function creerAjustement(int $magasinId, string $date, array $ecarts, string $commentaire, User $user): Document
+    {
+        $document = Document::create([
+            'type' => Document::AJUSTEMENT,
+            'date_mouvement' => $date,
+            'magasin_id' => $magasinId,
+            'commentaire' => mb_substr($commentaire, 0, 500),
+            'statut' => Document::BROUILLON,
+            'user_id' => $user->id,
+        ]);
+
+        foreach ($ecarts as $articleId => $ecart) {
+            $document->lignes()->create([
+                'article_id' => $articleId,
+                'quantite' => abs($ecart),
+                'sens' => $ecart > 0 ? 1 : -1,
+            ]);
+        }
+
+        $this->appliquer($document, $user);
+        $this->journaliser($document, 'document_valide', $user);
+
+        return $document;
+    }
+
+    /**
      * Stock disponible par article dans un magasin : [article_id => quantité].
      */
     public function stocksDisponibles(int $magasinId, array $articleIds): array
@@ -226,7 +255,7 @@ class MouvementService
         ]);
     }
 
-    protected function stockVerrouille(int $magasinId, int $articleId): Stock
+    public function stockVerrouille(int $magasinId, int $articleId): Stock
     {
         Stock::insertOrIgnore([
             'magasin_id' => $magasinId,

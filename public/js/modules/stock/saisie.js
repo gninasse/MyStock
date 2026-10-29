@@ -2,7 +2,7 @@
  * saisie.js
  * Saisie d'une entrée ou d'une sortie de stock (SFD 7.3 et 7.4).
  */
-import { echapper, envoyer, FormulaireModal } from '../referentiel/common.js';
+import { echapper, envoyerJson, FormulaireModal } from '../referentiel/common.js';
 
 $(function () {
     const $page = $('#page-saisie');
@@ -276,7 +276,7 @@ $(function () {
         const $boutons = $('[data-action]').prop('disabled', true);
         $('#erreurs').addClass('d-none');
 
-        envoyer(url, doc.id ? 'PUT' : 'POST', donnees)
+        envoyerJson(url, doc.id ? 'PUT' : 'POST', donnees)
             .done((response) => {
                 const { id, statut } = response.data;
                 Swal.fire({ icon: 'success', title: 'Succès', text: response.message }).then(() => {

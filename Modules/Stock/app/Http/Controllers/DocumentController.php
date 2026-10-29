@@ -74,7 +74,7 @@ class DocumentController extends Controller
 
     public function show(Request $request, $id)
     {
-        $document = Document::with(['lignes.article', 'magasin', 'direction', 'service', 'unite', 'utilisateur', 'validateur', 'documentAnnule', 'annulation'])
+        $document = Document::with(['lignes.article', 'magasin', 'direction', 'service', 'unite', 'utilisateur', 'validateur', 'documentAnnule', 'annulation', 'inventaire'])
             ->findOrFail($id);
         $this->autoriserMagasin($request->user(), $document->magasin);
 
