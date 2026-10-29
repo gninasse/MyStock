@@ -1,0 +1,20 @@
+{
+    "name": "Referentiel",
+    "alias": "referentiel",
+    "description": "Référentiels de MyStock : magasins et responsables, structures organisationnelles (directions, services, unités), catégories, articles et articles fréquents.",
+    "keywords": [
+        "magasin",
+        "structure",
+        "categorie",
+        "article",
+        "referentiel"
+    ],
+    "priority": 1,
+    "providers": [
+        "Modules\\Referentiel\\Providers\\ReferentielServiceProvider"
+    ],
+    "version": "1.0.0",
+    "requires": ["Core"],
+    "icon": "fas fa-boxes",
+    "files": []
+}
