@@ -103,6 +103,10 @@ class MouvementService
                 throw ValidationException::withMessages(['document' => 'Seule une entrée ou une sortie validée peut être annulée.']);
             }
 
+            if ($document->document_annule_id) {
+                throw ValidationException::withMessages(['document' => 'Un mouvement d\'annulation ne peut pas être annulé.']);
+            }
+
             $typeInverse = $document->type === Document::ENTREE ? Document::SORTIE : Document::ENTREE;
             $inverse = Document::create([
                 'type' => $typeInverse,

@@ -11,7 +11,9 @@ class StructureTest extends ReferentielTestCase
         $this->actingAs($this->utilisateur('admin'));
 
         $direction = $this->postJson(route('referentiel.structures.store', 'direction'), ['code' => 'dir-001', 'libelle' => 'Direction Générale'])
-            ->assertOk()->json('data');
+            ->assertOk()
+            ->assertJsonPath('message', 'Direction créée avec succès')
+            ->json('data');
         $service = $this->postJson(route('referentiel.structures.store', 'service'), ['code' => 'SERV-001', 'libelle' => 'Informatique', 'direction_id' => $direction['id']])
             ->assertOk()->json('data');
         $this->postJson(route('referentiel.structures.store', 'unite'), ['code' => 'UNIT-001', 'libelle' => 'Support', 'service_id' => $service['id']])

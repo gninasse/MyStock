@@ -17,12 +17,12 @@ use Modules\Referentiel\Models\Unite;
 class StructureController extends Controller
 {
     /**
-     * niveau => [modèle, table, colonne parent, table parent, libellé]
+     * niveau => [modèle, table, colonne parent, table parent, libellé, accord du participe]
      */
     protected const NIVEAUX = [
-        'direction' => [Direction::class, 'directions', null, null, 'Direction'],
-        'service' => [Service::class, 'services', 'direction_id', 'directions', 'Service'],
-        'unite' => [Unite::class, 'unites', 'service_id', 'services', 'Unité'],
+        'direction' => [Direction::class, 'directions', null, null, 'Direction', 'e'],
+        'service' => [Service::class, 'services', 'direction_id', 'directions', 'Service', ''],
+        'unite' => [Unite::class, 'unites', 'service_id', 'services', 'Unité', 'e'],
     ];
 
     public function index()
@@ -46,7 +46,7 @@ class StructureController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => self::NIVEAUX[$niveau][4].' créé(e) avec succès',
+            'message' => $this->libelle($niveau, 'créé').' avec succès',
             'data' => $structure,
         ]);
     }
@@ -59,7 +59,7 @@ class StructureController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => self::NIVEAUX[$niveau][4].' modifié(e) avec succès',
+            'message' => $this->libelle($niveau, 'modifié').' avec succès',
             'data' => $structure,
         ]);
     }
@@ -92,7 +92,15 @@ class StructureController extends Controller
             ], 422);
         }
 
-        return response()->json(['success' => true, 'message' => self::NIVEAUX[$niveau][4].' supprimé(e)']);
+        return response()->json(['success' => true, 'message' => $this->libelle($niveau, 'supprimé')]);
+    }
+
+    /**
+     * « Direction créée », « Service modifié »…
+     */
+    protected function libelle(string $niveau, string $participe): string
+    {
+        return self::NIVEAUX[$niveau][4].' '.$participe.self::NIVEAUX[$niveau][5];
     }
 
     protected function niveau(string $niveau): array

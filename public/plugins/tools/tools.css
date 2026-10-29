@@ -2270,3 +2270,7 @@ transform: rotate(-180deg);
 .fa-1.3x {
     font-size: 1.3em;
 }
+/* Les champs saisis en majuscules gardent un texte indicatif normal */
+.text-uppercase::placeholder {
+    text-transform: none;
+}

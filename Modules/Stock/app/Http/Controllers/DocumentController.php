@@ -66,7 +66,7 @@ class DocumentController extends Controller
                 'statut' => $d->statut,
                 'utilisateur' => $d->utilisateur->full_name,
                 'modifiable' => $d->estBrouillon() && isset(self::PERMISSIONS[$d->type]) && $request->user()->can(self::PERMISSIONS[$d->type]),
-                'annulable' => $d->statut === Document::VALIDE && isset(self::PERMISSIONS[$d->type]) && $request->user()->can('stock.documents.annuler'),
+                'annulable' => $d->statut === Document::VALIDE && ! $d->document_annule_id && isset(self::PERMISSIONS[$d->type]) && $request->user()->can('stock.documents.annuler'),
             ]);
 
         return response()->json(['total' => $total, 'rows' => $rows]);

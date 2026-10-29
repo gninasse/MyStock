@@ -34,15 +34,30 @@ export function envoyer(url, method, data = {}) {
     });
 }
 
-export function confirmerPuisEnvoyer(question, url, method, data = {}) {
-    return Swal.fire({
+/**
+ * Demande confirmation puis envoie la requête. Renvoie une promesse jQuery
+ * (done / fail), rejetée sans message si l'utilisateur renonce.
+ * boutons : { confirmer, renoncer } pour changer les libellés par défaut.
+ */
+export function confirmerPuisEnvoyer(question, url, method, data = {}, boutons = {}) {
+    const resultat = $.Deferred();
+
+    Swal.fire({
         icon: 'question',
         title: 'Confirmation',
         text: question,
         showCancelButton: true,
-        confirmButtonText: 'Confirmer',
-        cancelButtonText: 'Annuler'
-    }).then((choix) => (choix.isConfirmed ? envoyer(url, method, data) : $.Deferred().reject()));
+        confirmButtonText: boutons.confirmer ?? 'Confirmer',
+        cancelButtonText: boutons.renoncer ?? 'Annuler'
+    }).then((choix) => {
+        if (!choix.isConfirmed) {
+            resultat.reject();
+            return;
+        }
+        envoyer(url, method, data).done(resultat.resolve).fail(resultat.reject);
+    });
+
+    return resultat.promise();
 }
 
 /**

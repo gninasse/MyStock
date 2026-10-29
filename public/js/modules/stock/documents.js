@@ -42,7 +42,7 @@ window.actionsEvents = {
     },
     'click .btn-annuler': (e, value, row) => {
         confirmerPuisEnvoyer(`Annuler le mouvement ${row.reference} ? Un mouvement inverse sera généré. Cette action est irréversible.`,
-            route('stock.documents.annuler', value), 'POST')
+            route('stock.documents.annuler', value), 'POST', {}, { confirmer: 'Oui, annuler le mouvement', renoncer: 'Non' })
             .done((response) => {
                 notifierSucces(response.message);
                 $('#documents-table').bootstrapTable('refresh');

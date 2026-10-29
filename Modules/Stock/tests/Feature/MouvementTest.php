@@ -212,8 +212,12 @@ class MouvementTest extends TestCase
         $this->assertSame(Document::ANNULE, Document::find($id)->statut);
         $this->assertDatabaseHas('documents', ['commentaire' => 'Annulation du mouvement ENT-20260522-001', 'document_annule_id' => $id]);
 
-        // Une seule annulation possible
+        // Une seule annulation possible, et l'annulation elle-même n'est pas annulable
         $this->postJson(route('stock.documents.annuler', $id))->assertStatus(422);
+        $inverse = Document::where('document_annule_id', $id)->value('id');
+        $this->postJson(route('stock.documents.annuler', $inverse))
+            ->assertStatus(422)
+            ->assertJsonPath('errors.document.0', 'Un mouvement d\'annulation ne peut pas être annulé.');
     }
 
     public function test_annulation_refusee_si_le_stock_a_ete_consomme(): void
