@@ -3,72 +3,54 @@
 namespace Modules\Referentiel\Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 use Modules\Core\Models\Role;
 use Modules\Core\Services\PermissionService;
+use Nwidart\Modules\Facades\Module;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 
 /**
- * Les quatre rôles métier de MyStock (SFD 2.1 et 2.2).
+ * Les quatre rôles métier de MyStock (SFD 2.1 et 2.2), assemblés à partir
+ * du config/roles.php de chaque module actif. Un nom de permission terminé
+ * par « .* » désigne toutes les permissions du préfixe.
  * Rejouable : les permissions des rôles sont resynchronisées à chaque exécution.
  */
 class RolesSeeder extends Seeder
 {
     public function run(PermissionService $permissionService): void
     {
-        $permissionService->syncModulePermissions('Core');
-        $permissionService->syncModulePermissions('Referentiel');
+        $roles = [];
 
-        $referentiel = array_keys(require module_path('Referentiel', 'config/permissions.php'));
+        foreach (Module::allEnabled() as $module) {
+            $permissionService->syncModulePermissions($module->getName());
 
-        $roles = [
-            'admin' => [
-                'description' => 'Administrateur : tous les droits métier, utilisateurs et journal d\'audit',
-                'permissions' => array_merge($referentiel, [
-                    'cores.dashboard.view',
-                    'cores.users.index',
-                    'cores.users.store',
-                    'cores.users.update',
-                    'cores.users.reset-password',
-                    'cores.users.toggle-status',
-                    'cores.activities.index',
-                    'cores.activities.data',
-                    'cores.activities.show',
-                    'cores.activities.export',
-                ]),
-            ],
-            'gestionnaire' => [
-                'description' => 'Gestionnaire : entrées, sorties, inventaires et articles fréquents de ses magasins',
-                'permissions' => [
-                    'cores.dashboard.view',
-                    'referentiel.articles.index',
-                    'referentiel.articles.store',
-                    'referentiel.articles-frequents.manage',
-                ],
-            ],
-            'operateur' => [
-                'description' => 'Opérateur : réception (entrées) et articles fréquents de ses magasins',
-                'permissions' => [
-                    'cores.dashboard.view',
-                    'referentiel.articles.index',
-                    'referentiel.articles.store',
-                    'referentiel.articles-frequents.manage',
-                ],
-            ],
-            'consultant' => [
-                'description' => 'Consultant : consultation des états de tous les magasins',
-                'permissions' => [
-                    'cores.dashboard.view',
-                    'referentiel.magasins.tous',
-                ],
-            ],
-        ];
+            $fichier = $module->getPath().'/config/roles.php';
+            if (! file_exists($fichier)) {
+                continue;
+            }
 
-        foreach ($roles as $name => $definition) {
+            foreach (require $fichier as $nom => $definition) {
+                $roles[$nom]['description'] ??= $definition['description'] ?? null;
+                $roles[$nom]['permissions'] = array_merge($roles[$nom]['permissions'] ?? [], $definition['permissions'] ?? []);
+            }
+        }
+
+        $toutes = Permission::pluck('name');
+
+        foreach ($roles as $nom => $definition) {
+            $permissions = collect($definition['permissions'])
+                ->flatMap(fn (string $p) => Str::endsWith($p, '.*')
+                    ? $toutes->filter(fn ($nomPermission) => Str::startsWith($nomPermission, Str::beforeLast($p, '*')))
+                    : [$p])
+                ->unique()
+                ->values();
+
             $role = Role::firstOrCreate(
-                ['name' => $name, 'guard_name' => 'web'],
+                ['name' => $nom, 'guard_name' => 'web'],
                 ['description' => $definition['description']]
             );
-            $role->syncPermissions($definition['permissions']);
+            $role->syncPermissions($permissions);
         }
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();

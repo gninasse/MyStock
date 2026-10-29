@@ -89,6 +89,43 @@
                   @endcan
                 </ul>
               </li>
+              @canany(['stock.entrees.saisir', 'stock.sorties.saisir', 'stock.documents.index'])
+              <li class="nav-item {{ request()->routeIs('stock.*') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ request()->routeIs('stock.*') ? 'active' : '' }}">
+                  <i class="nav-icon bi bi-arrow-left-right"></i>
+                  <p>
+                    Mouvements
+                    <i class="nav-arrow bi bi-chevron-right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  @can('stock.entrees.saisir')
+                  <li class="nav-item">
+                    <a href="{{ route('stock.saisie.create', 'entrees') }}" class="nav-link {{ request()->is('stock/entrees/*') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-box-arrow-in-down"></i>
+                      <p>Nouvelle entrée</p>
+                    </a>
+                  </li>
+                  @endcan
+                  @can('stock.sorties.saisir')
+                  <li class="nav-item">
+                    <a href="{{ route('stock.saisie.create', 'sorties') }}" class="nav-link {{ request()->is('stock/sorties/*') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-box-arrow-up"></i>
+                      <p>Nouvelle sortie</p>
+                    </a>
+                  </li>
+                  @endcan
+                  @can('stock.documents.index')
+                  <li class="nav-item">
+                    <a href="{{ route('stock.documents.index') }}" class="nav-link {{ request()->routeIs('stock.documents.*') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-journal-text"></i>
+                      <p>Liste des documents</p>
+                    </a>
+                  </li>
+                  @endcan
+                </ul>
+              </li>
+              @endcanany
               @canany(['referentiel.magasins.index', 'referentiel.structures.index', 'referentiel.categories.index', 'referentiel.articles.index', 'referentiel.articles-frequents.manage'])
               <li class="nav-item {{ request()->routeIs('referentiel.*') ? 'menu-open' : '' }}">
                 <a href="#" class="nav-link {{ request()->routeIs('referentiel.*') ? 'active' : '' }}">

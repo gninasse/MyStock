@@ -4,6 +4,7 @@ namespace Modules\Referentiel\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Modules\Referentiel\Models\Direction;
@@ -81,8 +82,15 @@ class StructureController extends Controller
             ], 422);
         }
 
-        // Le contrôle « lié à des mouvements de stock » arrivera avec le module Stock
-        $structure->delete();
+        try {
+            $structure->delete();
+        } catch (QueryException $e) {
+            // Clé étrangère : la structure est bénéficiaire de documents de stock
+            return response()->json([
+                'success' => false,
+                'message' => 'Impossible de supprimer : cet élément est lié à des mouvements de stock. Voulez-vous le désactiver ?',
+            ], 422);
+        }
 
         return response()->json(['success' => true, 'message' => self::NIVEAUX[$niveau][4].' supprimé(e)']);
     }

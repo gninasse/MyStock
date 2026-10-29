@@ -28,6 +28,21 @@ class Article extends ReferentielModel
         return $this->belongsTo(User::class, 'cree_par');
     }
 
+    /**
+     * Prochain code automatique : préfixe configurable + numéro suivant le plus grand existant.
+     */
+    public static function prochainCode(): string
+    {
+        $prefixe = config('referentiel.article_code_prefixe');
+        $dernier = static::where('code', 'like', $prefixe.'%')->pluck('code')
+            ->map(fn (string $code) => substr($code, strlen($prefixe)))
+            ->filter(fn (string $suffixe) => ctype_digit($suffixe))
+            ->map(fn (string $suffixe) => (int) $suffixe)
+            ->max() ?? 0;
+
+        return $prefixe.str_pad((string) ($dernier + 1), 3, '0', STR_PAD_LEFT);
+    }
+
     public function scopeActifs(Builder $query): Builder
     {
         return $query->where('actif', true);

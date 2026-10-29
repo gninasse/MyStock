@@ -1,0 +1,19 @@
+{
+    "name": "Stock",
+    "alias": "stock",
+    "description": "Mouvements de stock de MyStock : entrées, sorties, ajustements, stock par magasin et annulation des mouvements validés.",
+    "keywords": [
+        "stock",
+        "mouvement",
+        "entree",
+        "sortie"
+    ],
+    "priority": 2,
+    "providers": [
+        "Modules\\Stock\\Providers\\StockServiceProvider"
+    ],
+    "version": "1.0.0",
+    "requires": ["Core", "Referentiel"],
+    "icon": "fas fa-dolly",
+    "files": []
+}

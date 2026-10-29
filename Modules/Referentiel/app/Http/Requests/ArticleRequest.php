@@ -4,12 +4,16 @@ namespace Modules\Referentiel\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Modules\Referentiel\Models\Article;
 
 class ArticleRequest extends FormRequest
 {
     protected function prepareForValidation(): void
     {
-        $this->merge(['code' => strtoupper(trim((string) $this->code))]);
+        $code = strtoupper(trim((string) $this->code));
+
+        // Code laissé vide à la création : généré automatiquement
+        $this->merge(['code' => $code === '' && ! $this->route('id') ? Article::prochainCode() : $code]);
     }
 
     public function rules(): array

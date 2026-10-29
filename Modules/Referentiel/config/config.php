@@ -17,6 +17,9 @@ return [
         'PAIRE' => 'Paire',
     ],
 
+    // Préfixe des codes article générés automatiquement (SFD 5.2.3) : ART-001, ART-002…
+    'article_code_prefixe' => 'ART-',
+
     // Nombre maximum d'articles fréquents par magasin (SFD 6.3)
     'articles_frequents_max' => 50,
 ];

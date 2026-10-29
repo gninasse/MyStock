@@ -74,8 +74,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="code" class="form-label">Code <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control text-uppercase" id="code" name="code" maxlength="30" required>
+                        <label for="code" class="form-label">Code</label>
+                        <input type="text" class="form-control text-uppercase" id="code" name="code" maxlength="30" placeholder="Laisser vide pour générer (ART-001…)">
                     </div>
                     <div class="mb-3">
                         <label for="designation" class="form-label">Désignation <span class="text-danger">*</span></label>
