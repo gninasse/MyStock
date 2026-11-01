@@ -94,6 +94,9 @@
                     <option value="deleted">Suppression</option>
                     <option value="login">Connexion</option>
                     <option value="logout">Déconnexion</option>
+                    @foreach (['document_valide', 'document_annule', 'transfert_expedie', 'transfert_receptionne', 'transfert_annule', 'inventaire_valide', 'parametres_modifies', 'export'] as $action)
+                        <option value="{{ $action }}">{{ __("activites.{$action}") }}</option>
+                    @endforeach
                 </select>
             </div>
 

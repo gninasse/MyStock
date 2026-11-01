@@ -170,7 +170,7 @@
                     <li class="list-group-item small">
                         <span class="text-muted">{{ $action->created_at->format('d/m/Y H:i') }}</span>
                         — {{ $action->causer?->full_name ?? 'Système' }}
-                        — <strong>{{ $action->description }}</strong>
+                        — <strong>{{ $action->libelle }}</strong>
                         <span class="text-muted">({{ $action->module ?? $action->log_name }})</span>
                     </li>
                 @empty

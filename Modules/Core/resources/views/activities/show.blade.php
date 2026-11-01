@@ -21,7 +21,7 @@
                     <td>
                         <span class="badge bg-{{ $activity->badge_color }}">
                             <i class="fas {{ $activity->icon }} me-1"></i>
-                            {{ $activity->description }}
+                            {{ $activity->libelle }} <small class="text-muted">({{ $activity->description }})</small>
                         </span>
                     </td>
                 </tr>

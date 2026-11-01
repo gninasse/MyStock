@@ -94,22 +94,8 @@ window.actionFormatter = function (value, row) {
 };
 
 window.descriptionFormatter = function (value, row) {
-    let label = row.description;
-    const actions = {
-        'created': 'Création',
-        'updated': 'Modification',
-        'deleted': 'Suppression',
-        'restored': 'Restauration',
-        'login': 'Connexion',
-        'logout': 'Déconnexion',
-        'permission_changed': 'Changement permission',
-        'role_changed': 'Changement rôle'
-    };
-
-    if (actions[row.description]) {
-        label = actions[row.description];
-    }
-
+    // Libellé lisible calculé côté serveur (lang/fr/activites.php)
+    const label = $('<div>').text(row.libelle || row.description).html();
     return `<span class="badge bg-${row.badge_color}">${label}</span>`;
 };
 

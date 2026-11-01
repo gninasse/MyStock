@@ -52,6 +52,16 @@ class Activity extends BaseActivity
     }
 
     /**
+     * Libellé lisible de l'action (lang/fr/activites.php), sinon la description mise en forme.
+     */
+    public function getLibelleAttribute(): string
+    {
+        $cle = "activites.{$this->description}";
+
+        return __($cle) !== $cle ? __($cle) : ucfirst(str_replace('_', ' ', (string) $this->description));
+    }
+
+    /**
      * Obtenir l'icône selon le type d'activité
      */
     public function getIconAttribute(): string
@@ -81,6 +91,9 @@ class Activity extends BaseActivity
             'restored' => 'info',
             'login' => 'primary',
             'logout' => 'secondary',
+            'login_failed', 'document_annule', 'transfert_annule', 'brouillon_supprime' => 'danger',
+            'document_valide', 'inventaire_valide', 'transfert_receptionne' => 'success',
+            'transfert_expedie', 'parametres_modifies' => 'warning',
             default => 'secondary',
         };
     }

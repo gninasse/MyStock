@@ -1,8 +1,28 @@
-# MyStock Boilerplate 🚀
+# MyStock 📦
 
-Un template de démarrage moderne basé sur **Laravel 12** structuré en multi-modules, avec support natif de **PostgreSQL**, gestion avancée des permissions (Spatie), journalisation des activités et commandes interactives.
+Gestion de stock multi-magasins (Laravel 12, modules, PostgreSQL) : référentiels, entrées,
+sorties, transferts entre magasins, inventaires, lots et péremption, états et tableau de bord.
+Le guide d'utilisation est dans [docs/GUIDE.md](docs/GUIDE.md).
 
-Ce dépôt est conçu pour vous permettre de lancer un nouveau projet en quelques minutes seulement.
+## 🧩 Modules
+
+| Module | Contenu |
+| --- | --- |
+| **Core** | Utilisateurs, rôles et permissions (Spatie), journal d'audit, commandes `cores:` |
+| **Referentiel** | Magasins et rattachements, structures (directions, services, unités), catégories, articles, articles fréquents, **paramètres de l'application** |
+| **Stock** | Entrées, sorties, transferts et réceptions, retours, annulations, inventaires, lots (FEFO) |
+| **Etats** | Stock par magasin / catégorie, journal, fiche de stock, transferts, péremptions, exports Excel/PDF, tableau de bord |
+
+## ⚙️ Paramètres (Administration > Paramètres)
+
+| Paramètre | Effet | Défaut |
+| --- | --- | --- |
+| Nom de l'organisation | En-tête des états PDF | CHU-YO |
+| Ancienneté maximale d'un mouvement | Nombre de jours de rétroactivité autorisés | 7 |
+| Déroulement d'un transfert | `DEUX_ETAPES` (expédition puis réception), `UNE_ETAPE`, ou `UNE_ETAPE_SI_ACCES` (une étape si l'expéditeur peut aussi réceptionner au magasin destinataire) | Deux étapes |
+| Quantité expédiée mais non reçue | Réintégrée au magasin source, ou comptée comme perte en transit | Réintégrée |
+| Suivi des lots | Saisie n° de lot / péremption à l'entrée, sorties en FEFO | Désactivé |
+| Alerte de péremption | Délai (jours) avant péremption pour l'alerte | 90 |
 
 ---
 
@@ -266,4 +286,9 @@ Le module **Core** met à votre disposition plusieurs commandes artisan sous le 
 
 ---
 
-Développement agréable et productif avec **MyStock Boilerplate** ! 💻⚙️
+## 🧪 Tests
+
+```bash
+php artisan test   # SQLite en mémoire, aucune base à préparer
+```
+

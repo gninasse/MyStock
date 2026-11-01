@@ -85,4 +85,10 @@ class ActivityTest extends TestCase
         $response->assertStatus(200);
         $this->assertEquals('Système', $response->json('rows.0.causer_name'));
     }
+
+    public function test_libelles_lisibles_des_actions(): void
+    {
+        $this->assertSame('Transfert expédié', (new Activity(['description' => 'transfert_expedie']))->libelle);
+        $this->assertSame('Role assigned', (new Activity(['description' => 'role_assigned']))->libelle);
+    }
 }

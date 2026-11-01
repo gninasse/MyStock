@@ -121,6 +121,7 @@ class ActivityController extends Controller
                 'log_name' => $activity->log_name,
                 'module' => $activity->module,
                 'description' => $activity->description,
+                'libelle' => $activity->libelle,
                 'causer_name' => $activity->causer ? $activity->causer->name.' '.$activity->causer->last_name : 'Système',
                 'causer_roles' => $activity->causer_roles,
                 'subject_type' => class_basename($activity->subject_type),
