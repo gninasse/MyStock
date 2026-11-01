@@ -96,6 +96,16 @@ class EtatController extends Controller
         return $this->rendre($request, 'transferts', $this->etats->transferts($filtres, $request->user()), $filtres);
     }
 
+    public function peremptions(Request $request)
+    {
+        $filtres = $request->validate([
+            'magasin_id' => ['nullable', 'integer'],
+            'jours' => ['nullable', 'integer', 'min:0', 'max:730'],
+        ]);
+
+        return $this->rendre($request, 'peremptions', $this->etats->peremptions($filtres, $request->user()), $filtres);
+    }
+
     /**
      * Impression navigateur : seule la journalisation passe par le serveur (SFD 9.5).
      */

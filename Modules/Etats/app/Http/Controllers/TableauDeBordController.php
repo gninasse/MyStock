@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Modules\Core\Models\Activity;
 use Modules\Etats\Services\AlerteStockService;
+use Modules\Etats\Services\EtatsService;
+use Modules\Referentiel\Services\Parametres;
 use Modules\Referentiel\Services\PerimetreMagasins;
 use Modules\Stock\Models\Document;
 use Modules\Stock\Models\Stock;
@@ -41,6 +43,9 @@ class TableauDeBordController extends Controller
                     ->where('type', Document::TRANSFERT)->where('statut', Document::EN_TRANSIT)
                     ->where(fn ($q) => $q->whereIn('magasin_id', $magasins)->orWhereIn('magasin_destination_id', clone $magasins))
                     ->oldest('validated_at')->limit(10)->get()
+                : null,
+            'nombrePeremptions' => Parametres::get('lots_actifs') && $user->can('etats.alertes')
+                ? app(EtatsService::class)->nombrePeremptions($user)
                 : null,
             'magasinsVisibles' => $perimetre->query($user)->pluck('id')->all(),
             'dernieresActions' => $user->can('cores.activities.index')

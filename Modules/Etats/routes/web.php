@@ -16,6 +16,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/journal-des-mouvements', [EtatController::class, 'journal'])->middleware('permission:etats.journal')->name('journal');
         Route::get('/fiche-de-stock', [EtatController::class, 'ficheStock'])->middleware('permission:etats.fiche-stock')->name('fiche-stock');
         Route::get('/transferts', [EtatController::class, 'transferts'])->middleware('permission:etats.transferts')->name('transferts');
+        Route::get('/peremptions', [EtatController::class, 'peremptions'])->middleware('permission:etats.alertes')->name('peremptions');
         Route::post('/impression', [EtatController::class, 'impression'])->name('impression');
     });
 });

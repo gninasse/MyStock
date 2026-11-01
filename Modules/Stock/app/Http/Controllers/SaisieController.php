@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Modules\Referentiel\Models\Direction;
 use Modules\Referentiel\Models\Magasin;
 use Modules\Referentiel\Services\PerimetreMagasins;
+use Modules\Stock\Services\LotService;
 use Modules\Stock\Services\MouvementService;
 
 /**
@@ -15,7 +16,11 @@ use Modules\Stock\Services\MouvementService;
  */
 class SaisieController extends Controller
 {
-    public function __construct(protected MouvementService $mouvements, protected PerimetreMagasins $perimetre) {}
+    public function __construct(
+        protected MouvementService $mouvements,
+        protected PerimetreMagasins $perimetre,
+        protected LotService $lots,
+    ) {}
 
     public function articlesFrequents(Request $request, $magasinId)
     {
@@ -41,7 +46,12 @@ class SaisieController extends Controller
         $magasin = $this->magasinAccessible($request, $magasinId);
         $ids = array_map('intval', (array) $request->input('article_ids', []));
 
-        return response()->json(['success' => true, 'data' => $this->mouvements->stocksDisponibles($magasin->id, $ids)]);
+        return response()->json([
+            'success' => true,
+            'data' => $this->mouvements->stocksDisponibles($magasin->id, $ids),
+            // Lots disponibles en ordre FEFO, pour montrer ce qui sortira en premier
+            'lots' => $this->lots->lotsDisponibles($magasin->id, $ids),
+        ]);
     }
 
     public function beneficiaires()

@@ -195,4 +195,23 @@ class LotTest extends TestCase
         $this->get(route('stock.documents.edit', Document::first()->id))
             ->assertSee('&quot;lot_numero&quot;:&quot;B7&quot;', false)->assertSee('2027-02-28');
     }
+
+    public function test_etat_des_peremptions_et_apercu_fefo(): void
+    {
+        app(Parametres::class)->enregistrer(['lots_actifs' => true, 'peremption_alerte_jours' => 60], $this->user);
+        $this->livrer(); // L2 périme le 01/07 (dans 40 jours), L1 le 01/08 (dans 71 jours)
+
+        $this->actingAs($this->user)->get(route('etats.peremptions'))
+            ->assertOk()->assertSee('L2')->assertDontSee('>L1<', false)->assertSee('40');
+        $this->get(route('etats.peremptions', ['jours' => 90]))->assertSee('L1');
+        $this->get(route('etats.tableau-de-bord'))->assertSee('1 lot(s) en stock périmé(s) ou qui périment dans les 60 jours');
+
+        Carbon::setTestNow('2026-07-05 10:00:00');
+        $this->get(route('etats.peremptions'))->assertSee('Périmé');
+
+        $this->getJson(route('stock.saisie.stocks', [$this->magasin->id, 'article_ids' => [$this->amox->id]]))
+            ->assertJsonPath('data.'.$this->amox->id, 20)
+            ->assertJsonPath('lots.'.$this->amox->id.'.0.numero', 'L2')
+            ->assertJsonPath('lots.'.$this->amox->id.'.1.numero', 'L1');
+    }
 }

@@ -11,6 +11,7 @@ use Modules\Etats\Support\Etat;
 use Modules\Referentiel\Models\Article;
 use Modules\Referentiel\Models\Categorie;
 use Modules\Referentiel\Models\Magasin;
+use Modules\Referentiel\Services\Parametres;
 use Modules\Referentiel\Services\PerimetreMagasins;
 use Modules\Stock\Models\Document;
 
@@ -300,6 +301,65 @@ class EtatsService
             numeriques: ['expedie', 'recu', 'ecart'],
             groupes: [['titre' => null, 'lignes' => $lignes->all(), 'total' => null]],
         );
+    }
+
+    /**
+     * Lots en stock périmés ou qui périment dans les N jours (paramètre peremption_alerte_jours).
+     * Filtres : magasin_id, jours.
+     */
+    public function peremptions(array $f, User $user): Etat
+    {
+        $jours = (int) ($f['jours'] ?? Parametres::get('peremption_alerte_jours'));
+        $lignes = $this->requetePeremptions($user, $jours)
+            ->when($f['magasin_id'] ?? null, fn ($q, $id) => $q->where('s.magasin_id', $id))
+            ->limit(config('etats.lignes_max'))
+            ->get()
+            ->map(function ($r) {
+                $restant = (int) now()->startOfDay()->diffInDays(Carbon::parse($r->date_peremption), false);
+
+                return [
+                    'magasin' => $r->magasin,
+                    'article' => "{$r->designation} ({$r->code})",
+                    'lot' => $r->numero,
+                    'peremption' => Carbon::parse($r->date_peremption)->format('d/m/Y'),
+                    'jours' => $restant < 0 ? 'Périmé' : $restant,
+                    'quantite' => (int) $r->quantite,
+                    '_classe' => $restant < 0 ? 'alerte-sous' : 'alerte-egal',
+                ];
+            });
+
+        return new Etat(
+            titre: 'Lots périmés ou proches de la péremption',
+            filtres: [
+                'Horizon' => "{$jours} jours",
+                'Magasin' => isset($f['magasin_id']) ? Magasin::find($f['magasin_id'])?->libelle : 'Tous',
+            ],
+            colonnes: ['magasin' => 'Magasin', 'article' => 'Article', 'lot' => 'N° de lot', 'peremption' => 'Péremption', 'jours' => 'Jours restants', 'quantite' => 'Quantité'],
+            numeriques: ['jours', 'quantite'],
+            groupes: [['titre' => null, 'lignes' => $lignes->all(), 'total' => null]],
+        );
+    }
+
+    /**
+     * Nombre de lots en stock périmés ou proches de la péremption (tableau de bord).
+     */
+    public function nombrePeremptions(User $user): int
+    {
+        return $this->requetePeremptions($user, Parametres::get('peremption_alerte_jours'))->count();
+    }
+
+    protected function requetePeremptions(User $user, int $jours): Builder
+    {
+        return DB::table('stocks_lots as s')
+            ->join('lots as l', 'l.id', '=', 's.lot_id')
+            ->join('articles as a', 'a.id', '=', 'l.article_id')
+            ->join('magasins as m', 'm.id', '=', 's.magasin_id')
+            ->whereIn('s.magasin_id', $this->perimetre->query($user)->select('id'))
+            ->where('s.quantite', '>', 0)
+            ->whereNotNull('l.date_peremption')
+            ->whereDate('l.date_peremption', '<=', now()->addDays($jours)->toDateString())
+            ->orderBy('l.date_peremption')->orderBy('m.libelle')->orderBy('a.designation')
+            ->select('m.libelle as magasin', 'a.code', 'a.designation', 'l.numero', 'l.date_peremption', 's.quantite');
     }
 
     /**

@@ -30,6 +30,14 @@
     @endcan
 </div>
 
+@if ($nombrePeremptions)
+    <div class="alert alert-warning d-flex align-items-center">
+        <i class="fas fa-hourglass-half me-2"></i>
+        {{ $nombrePeremptions }} lot(s) en stock périmé(s) ou qui périment dans les {{ \Modules\Referentiel\Services\Parametres::get('peremption_alerte_jours') }} jours.
+        <a href="{{ route('etats.peremptions') }}" class="ms-auto">Voir les péremptions</a>
+    </div>
+@endif
+
 {{-- Indicateurs --}}
 <div class="row">
     <div class="col-md-4">

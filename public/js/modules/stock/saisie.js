@@ -17,6 +17,8 @@ $(function () {
     // article_id => { id, code, designation, unite_mesure, quantite, stock }
     const lignes = new Map();
     let frequents = [];
+    // article_id => lots disponibles en ordre FEFO (sorties et transferts)
+    const lotsParArticle = {};
     let minuterie = null;
 
     $page.data('lignes').forEach((l) => lignes.set(l.article_id, { ...l, id: l.article_id, stock: null }));
@@ -28,7 +30,10 @@ $(function () {
     function chargerStocks(ids) {
         const magasinId = $('#magasin_id').val();
         if (!debite || !magasinId || !ids.length) return $.Deferred().resolve({}).promise();
-        return $.get(route('stock.saisie.stocks', magasinId), { article_ids: ids }).then((r) => r.data);
+        return $.get(route('stock.saisie.stocks', magasinId), { article_ids: ids }).then((r) => {
+            Object.assign(lotsParArticle, r.lots ?? {});
+            return r.data;
+        });
     }
 
     function majStocksLignes() {
@@ -50,6 +55,24 @@ $(function () {
         }
     }
 
+    /**
+     * Lots qui seront consommés (FEFO) pour la quantité demandée.
+     */
+    function apercuFefo(ligne) {
+        let restant = ligne.quantite;
+        const parts = [];
+        for (const lot of lotsParArticle[ligne.id] ?? []) {
+            if (restant <= 0) break;
+            const part = Math.min(restant, lot.quantite);
+            const peremption = lot.date_peremption ? ` exp. ${lot.date_peremption.split('-').reverse().join('/')}` : '';
+            parts.push(`${echapper(lot.numero)}${peremption} : ${part}`);
+            restant -= part;
+        }
+        if (!parts.length) return '';
+        if (restant > 0) parts.push(`sans lot : ${restant}`);
+        return `<div class="small text-muted"><i class="fas fa-layer-group"></i> Lots (FEFO) — ${parts.join(' · ')}</div>`;
+    }
+
     function afficherLignes() {
         $('#nb-lignes').text(lignes.size);
         if (!lignes.size) {
@@ -61,7 +84,7 @@ $(function () {
             const insuffisant = debite && l.stock !== null && l.quantite > l.stock;
             return `
                 <tr data-id="${l.id}" class="${insuffisant ? 'table-danger' : ''}">
-                    <td>${echapper(l.designation)} <small class="text-muted">(${echapper(l.code)})</small></td>
+                    <td>${echapper(l.designation)} <small class="text-muted">(${echapper(l.code)})</small>${debite ? apercuFefo(l) : ''}</td>
                     <td><input type="number" class="form-control form-control-sm qte-ligne" min="1" step="1" value="${l.quantite}"></td>
                     <td>${echapper(unite(l.unite_mesure))}</td>
                     ${saisieLots ? `
@@ -101,6 +124,8 @@ $(function () {
             frequents = data;
             afficherFrequents();
             majStocksLignes();
+            // Lots des articles fréquents, pour l'aperçu FEFO
+            chargerStocks(data.map((a) => a.id)).done(afficherLignes);
         });
     }
 

@@ -195,8 +195,8 @@
               </li>
               @endcan
               @canany(['etats.stock-magasin', 'etats.stock-categorie', 'etats.journal', 'etats.fiche-stock', 'etats.transferts'])
-              <li class="nav-item {{ request()->routeIs('etats.stock-*', 'etats.journal', 'etats.fiche-stock', 'etats.transferts') ? 'menu-open' : '' }}">
-                <a href="#" class="nav-link {{ request()->routeIs('etats.stock-*', 'etats.journal', 'etats.fiche-stock', 'etats.transferts') ? 'active' : '' }}">
+              <li class="nav-item {{ request()->routeIs('etats.stock-*', 'etats.journal', 'etats.fiche-stock', 'etats.transferts', 'etats.peremptions') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ request()->routeIs('etats.stock-*', 'etats.journal', 'etats.fiche-stock', 'etats.transferts', 'etats.peremptions') ? 'active' : '' }}">
                   <i class="nav-icon bi bi-bar-chart"></i>
                   <p>
                     États
@@ -244,6 +244,16 @@
                     </a>
                   </li>
                   @endcan
+                  @if (\Modules\Referentiel\Services\Parametres::get('lots_actifs'))
+                  @can('etats.alertes')
+                  <li class="nav-item">
+                    <a href="{{ route('etats.peremptions') }}" class="nav-link {{ request()->routeIs('etats.peremptions') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-hourglass-split"></i>
+                      <p>Péremptions</p>
+                    </a>
+                  </li>
+                  @endcan
+                  @endif
                 </ul>
               </li>
               @endcanany

@@ -35,7 +35,9 @@ Une tâche par itération de la boucle de développement : implémenter, tester
       (paramètre `lots_actifs`). Sorties, transferts, ajustements négatifs : FEFO automatique
       puis stock sans lot. Annulations et transferts conservent les lots de bout en bout
       (réception et écart répartis sur les lots expédiés). Lots affichés sur la fiche document.
-- [ ] 7. **Lots et péremption (sorties, transferts, alertes)** : proposition FEFO à la sortie
-      et au transfert, lot suivi de bout en bout, alerte et état « Péremptions proches ».
+- [x] 7. **Lots et péremption (sorties, transferts, alertes)** : aperçu FEFO sous chaque
+      ligne de sortie/transfert (lots qui seront consommés), état « Péremptions » (périmés
+      en rouge, proches en orange, horizon paramétrable `peremption_alerte_jours`, export),
+      alerte au tableau de bord et entrée de menu quand `lots_actifs` est activé.
 - [ ] 8. **Finitions** : libellés lisibles du journal d'audit, README et guide utilisateur
       à jour, revue de code finale.
