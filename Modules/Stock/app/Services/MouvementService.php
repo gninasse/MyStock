@@ -5,7 +5,7 @@ namespace Modules\Stock\Services;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Core\Models\User;
-use Modules\Referentiel\Models\Article;
+use Modules\Referentiel\Services\Parametres;
 use Modules\Stock\Models\Document;
 use Modules\Stock\Models\Stock;
 
@@ -214,7 +214,7 @@ class MouvementService
             return 'La date du mouvement ne peut pas être dans le futur.';
         }
 
-        $jours = config('stock.jours_retroactifs_max');
+        $jours = Parametres::get('mouvement_jours_retroactifs');
         if ($date < now()->subDays($jours)->toDateString()) {
             return "La date du mouvement ne peut pas être antérieure à {$jours} jours.";
         }

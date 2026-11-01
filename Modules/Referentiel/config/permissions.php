@@ -4,6 +4,9 @@ return [
     // Périmètre
     'referentiel.magasins.tous' => 'Accéder à tous les magasins (sans rattachement)',
 
+    // Paramètres de l'application
+    'referentiel.parametres.gerer' => 'Modifier les paramètres de l\'application',
+
     // Magasins
     'referentiel.magasins.index' => 'Voir la liste des magasins',
     'referentiel.magasins.store' => 'Créer un magasin',

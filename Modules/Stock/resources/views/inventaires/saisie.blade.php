@@ -17,7 +17,7 @@
                 <label for="date_inventaire" class="form-label">Date <span class="text-danger">*</span></label>
                 <input type="date" class="form-control" id="date_inventaire" value="{{ now()->toDateString() }}"
                        max="{{ now()->toDateString() }}"
-                       min="{{ now()->subDays(config('stock.jours_retroactifs_max'))->toDateString() }}">
+                       min="{{ now()->subDays(\Modules\Referentiel\Services\Parametres::get('mouvement_jours_retroactifs'))->toDateString() }}">
             </div>
             <div class="col-md-5">
                 <label for="magasin_id" class="form-label">Magasin <span class="text-danger">*</span></label>

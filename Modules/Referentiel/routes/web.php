@@ -5,10 +5,17 @@ use Modules\Referentiel\Http\Controllers\ArticleController;
 use Modules\Referentiel\Http\Controllers\ArticleFrequentController;
 use Modules\Referentiel\Http\Controllers\CategorieController;
 use Modules\Referentiel\Http\Controllers\MagasinController;
+use Modules\Referentiel\Http\Controllers\ParametreController;
 use Modules\Referentiel\Http\Controllers\ResponsableMagasinController;
 use Modules\Referentiel\Http\Controllers\StructureController;
 
 Route::middleware(['auth'])->prefix('referentiel')->name('referentiel.')->group(function () {
+    // Paramètres de l'application
+    Route::middleware('permission:referentiel.parametres.gerer')->group(function () {
+        Route::get('/parametres', [ParametreController::class, 'index'])->name('parametres.index');
+        Route::put('/parametres', [ParametreController::class, 'update'])->name('parametres.update');
+    });
+
     // Magasins
     Route::prefix('magasins')->name('magasins.')->group(function () {
         Route::middleware('permission:referentiel.magasins.index')->group(function () {

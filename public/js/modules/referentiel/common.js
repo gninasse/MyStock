@@ -35,11 +35,6 @@ export function envoyer(url, method, data = {}) {
 }
 
 /**
- * Demande confirmation puis envoie la requête. Renvoie une promesse jQuery
- * (done / fail), rejetée sans message si l'utilisateur renonce.
- * boutons : { confirmer, renoncer } pour changer les libellés par défaut.
- */
-/**
  * Comme envoyer(), mais en JSON : pour les listes longues (lignes de document,
  * comptages d'inventaire) qui dépasseraient max_input_vars de PHP en formulaire.
  */
@@ -49,6 +44,11 @@ export function envoyerJson(url, method, data = {}) {
     });
 }
 
+/**
+ * Demande confirmation puis envoie la requête. Renvoie une promesse jQuery
+ * (done / fail), rejetée sans message si l'utilisateur renonce.
+ * boutons : { confirmer, renoncer } pour changer les libellés par défaut.
+ */
 export function confirmerPuisEnvoyer(question, url, method, data = {}, boutons = {}) {
     const resultat = $.Deferred();
 

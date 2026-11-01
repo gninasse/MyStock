@@ -38,9 +38,9 @@
                 </a>
               </li>
               @endcan
-              @canany(['cores.users.index', 'cores.roles.index', 'cores.permissions.index', 'cores.modules.index', 'cores.activities.index'])
-              <li class="nav-item {{ request()->routeIs('cores.*') ? 'menu-open' : '' }}">
-                <a href="#" class="nav-link {{ request()->routeIs('cores.*') ? 'active' : '' }}">
+              @canany(['referentiel.parametres.gerer', 'cores.users.index', 'cores.roles.index', 'cores.permissions.index', 'cores.modules.index', 'cores.activities.index'])
+              <li class="nav-item {{ request()->routeIs('cores.*', 'referentiel.parametres.*') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ request()->routeIs('cores.*', 'referentiel.parametres.*') ? 'active' : '' }}">
                   <i class="nav-icon bi bi-gear"></i>
                   <p>
                     Administration
@@ -54,6 +54,14 @@
                     <a href="{{ route('cores.dashboard') }}" class="nav-link {{ request()->routeIs('cores.dashboard') ? 'active' : '' }}">
                       <i class="nav-icon bi bi-speedometer2"></i>
                       <p>Tableau de bord système</p>
+                    </a>
+                  </li>
+                  @endcan
+                  @can('referentiel.parametres.gerer')
+                  <li class="nav-item">
+                    <a href="{{ route('referentiel.parametres.index') }}" class="nav-link {{ request()->routeIs('referentiel.parametres.*') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-sliders"></i>
+                      <p>Paramètres</p>
                     </a>
                   </li>
                   @endcan

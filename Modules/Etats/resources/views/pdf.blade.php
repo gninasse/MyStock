@@ -26,7 +26,7 @@
     <header>
         <img src="{{ public_path('adminlte/assets/img/AdminLTELogo.png') }}" alt="">
         <div class="titre">{{ $etat->titre }}</div>
-        <div>{{ config('app.name') }} — CHU-YO</div>
+        <div>{{ config('app.name') }} — {{ \Modules\Referentiel\Services\Parametres::get('organisation_nom') }}</div>
         <div class="edition">Édité le {{ now()->format('d/m/Y à H:i') }}<br>par {{ auth()->user()?->full_name }}</div>
     </header>
 
