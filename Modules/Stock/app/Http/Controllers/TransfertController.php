@@ -44,7 +44,7 @@ class TransfertController extends Controller
         $transfert = $this->transfertAReceptionner($request->user(), $id);
         $donnees = $request->validate([
             'quantites' => ['required', 'array'],
-            'quantites.*' => ['required', 'integer', 'min:0'],
+            'quantites.*' => ['required', 'integer', 'min:0', 'max:1000000'],
             'motif' => ['nullable', 'string', 'max:500'],
         ], [], ['quantites.*' => 'quantité reçue', 'motif' => 'motif']);
 

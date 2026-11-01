@@ -13,7 +13,9 @@ use Modules\Referentiel\Models\Magasin;
 use Modules\Referentiel\Services\Parametres;
 use Modules\Stock\Models\Document;
 use Modules\Stock\Models\Stock;
+use Modules\Stock\Services\MouvementService;
 use Modules\Stock\Services\TransfertService;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
@@ -334,5 +336,60 @@ class TransfertTest extends TestCase
         // Journal de l'expéditeur : transfert vers B et réintégration de l'écart
         $this->actingAs($this->expediteur)->get(route('etats.journal'))
             ->assertOk()->assertSee('→ Magasin B')->assertSee('Réintégration')->assertSee('↩ '.$transfert->reference);
+    }
+
+    public function test_un_retour_refuse_redevient_retournable(): void
+    {
+        $this->expedier($this->expediteur);
+        $origine = $this->transfert();
+        $service = app(TransfertService::class);
+        $service->receptionner($origine, [$this->papier->id => 20], null, $this->recepteur);
+
+        $this->retourner($this->recepteur, $origine, 20)->assertOk();
+        $retour = Document::where('document_origine_id', $origine->id)->where('type', Document::TRANSFERT)->firstOrFail();
+        $service->receptionner($retour, [$this->papier->id => 0], 'Non demandé', $this->expediteur);
+
+        $this->assertSame([$this->papier->id => 20], $service->quantitesRetournables($origine->fresh()));
+    }
+
+    public function test_un_brouillon_expedie_ne_peut_plus_etre_modifie_ni_supprime(): void
+    {
+        $this->actingAs($this->expediteur)->postJson(route('stock.saisie.store', 'transferts'), [
+            'action' => 'brouillon',
+            'date_mouvement' => '2026-05-22',
+            'magasin_id' => $this->source->id,
+            'magasin_destination_id' => $this->destination->id,
+            'lignes' => [['article_id' => $this->papier->id, 'quantite' => 20]],
+        ])->assertOk();
+        $perime = $this->transfert(); // chargé avant l'expédition
+        app(TransfertService::class)->expedier($perime, $this->expediteur);
+
+        $mouvements = app(MouvementService::class);
+        $this->expectException(ValidationException::class);
+        try {
+            $mouvements->enregistrerBrouillon(Document::TRANSFERT, ['date_mouvement' => '2026-05-22', 'magasin_id' => $this->source->id,
+                'magasin_destination_id' => $this->destination->id, 'lignes' => [['article_id' => $this->papier->id, 'quantite' => 45]]], $this->expediteur, $perime);
+        } finally {
+            $this->assertSame(20, $this->transfert()->lignes->first()->quantite);
+            try {
+                $mouvements->supprimerBrouillon($perime, $this->expediteur);
+            } catch (ValidationException) {
+            }
+            $this->assertSame(Document::EN_TRANSIT, $this->transfert()->statut);
+        }
+    }
+
+    public function test_annulation_hors_perimetre_interdite(): void
+    {
+        $entree = Document::create(['type' => Document::ENTREE, 'date_mouvement' => '2026-05-22', 'magasin_id' => $this->source->id,
+            'statut' => Document::BROUILLON, 'user_id' => $this->expediteur->id]);
+        $entree->lignes()->create(['article_id' => $this->papier->id, 'quantite' => 1, 'sens' => 1]);
+        app(MouvementService::class)->valider($entree, $this->expediteur);
+
+        $role = Role::findOrCreate('annuleur', 'web');
+        $role->givePermissionTo(['stock.documents.annuler']);
+        $horsPerimetre = $this->utilisateur([$this->destination])->assignRole('annuleur');
+
+        $this->actingAs($horsPerimetre)->postJson(route('stock.documents.annuler', $entree->id))->assertForbidden();
     }
 }

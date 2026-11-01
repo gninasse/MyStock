@@ -30,7 +30,7 @@ class DocumentRequest extends FormRequest
             'commentaire' => ['nullable', 'string', 'max:500'],
             'lignes' => ['nullable', 'array'],
             'lignes.*.article_id' => ['required', 'integer', 'exists:articles,id'],
-            'lignes.*.quantite' => ['required', 'integer'],
+            'lignes.*.quantite' => ['required', 'integer', 'max:1000000'],
             'lignes.*.lot_numero' => ['nullable', 'string', 'max:50'],
             'lignes.*.date_peremption' => ['nullable', 'date_format:Y-m-d'],
         ];

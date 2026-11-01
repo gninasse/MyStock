@@ -189,6 +189,7 @@ class DocumentController extends Controller
     public function annuler(Request $request, $id)
     {
         $document = Document::findOrFail($id);
+        $this->autoriserMagasin($request->user(), $document->magasin);
         $inverse = $this->mouvements->annuler($document, $request->user());
 
         return response()->json([

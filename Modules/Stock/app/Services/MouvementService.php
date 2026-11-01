@@ -23,11 +23,15 @@ class MouvementService
      */
     public function enregistrerBrouillon(string $type, array $donnees, User $user, ?Document $document = null): Document
     {
-        if ($document && ! $document->estBrouillon()) {
-            throw ValidationException::withMessages(['document' => 'Seul un brouillon peut être modifié.']);
-        }
-
         return DB::transaction(function () use ($type, $donnees, $user, $document) {
+            // Verrou puis contrôle : le document a pu être validé ou expédié entre-temps
+            if ($document) {
+                $document = Document::whereKey($document->id)->lockForUpdate()->firstOrFail();
+                if (! $document->estBrouillon()) {
+                    throw ValidationException::withMessages(['document' => 'Seul un brouillon peut être modifié.']);
+                }
+            }
+
             $entete = [
                 'date_mouvement' => $donnees['date_mouvement'],
                 'magasin_id' => $donnees['magasin_id'],
@@ -80,12 +84,15 @@ class MouvementService
 
     public function supprimerBrouillon(Document $document, User $user): void
     {
-        if (! $document->estBrouillon()) {
-            throw ValidationException::withMessages(['document' => 'Seul un brouillon peut être supprimé.']);
-        }
+        DB::transaction(function () use ($document, $user) {
+            $document = Document::whereKey($document->id)->lockForUpdate()->firstOrFail();
+            if (! $document->estBrouillon()) {
+                throw ValidationException::withMessages(['document' => 'Seul un brouillon peut être supprimé.']);
+            }
 
-        $this->journaliser($document, 'brouillon_supprime', $user);
-        $document->delete();
+            $this->journaliser($document, 'brouillon_supprime', $user);
+            $document->delete();
+        });
     }
 
     /**

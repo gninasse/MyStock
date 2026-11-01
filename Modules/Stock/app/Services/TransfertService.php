@@ -173,6 +173,8 @@ class TransfertService
             return [];
         }
 
+        // Un retour en transit compte pour sa quantité expédiée ; un retour reçu pour sa
+        // quantité reçue (ce qui a été refusé est revenu chez le destinataire, donc retournable)
         $retournees = DB::table('lignes_mouvement as l')
             ->join('documents as d', 'd.id', '=', 'l.document_id')
             ->where('d.type', Document::TRANSFERT)
@@ -180,7 +182,7 @@ class TransfertService
             ->whereIn('d.statut', [Document::EN_TRANSIT, Document::VALIDE])
             ->when($saufRetourId, fn ($q) => $q->where('d.id', '!=', $saufRetourId))
             ->groupBy('l.article_id')
-            ->selectRaw('l.article_id, SUM(l.quantite) as total')
+            ->selectRaw('l.article_id, SUM(CASE WHEN d.statut = ? THEN l.quantite ELSE COALESCE(l.quantite_recue, l.quantite) END) as total', [Document::EN_TRANSIT])
             ->pluck('total', 'article_id');
 
         return $transfert->lignes()->get()
@@ -194,7 +196,8 @@ class TransfertService
      */
     protected function controlerRetour(Document $retour): void
     {
-        $origine = Document::with('lignes')->find($retour->document_origine_id);
+        // Verrou sur le transfert d'origine : deux retours simultanés ne peuvent pas dépasser le reçu
+        $origine = Document::whereKey($retour->document_origine_id)->lockForUpdate()->first();
 
         if (! $origine || $origine->type !== Document::TRANSFERT || $origine->statut !== Document::VALIDE
             || $retour->magasin_id !== $origine->magasin_destination_id || $retour->magasin_destination_id !== $origine->magasin_id) {

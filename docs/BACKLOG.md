@@ -39,5 +39,16 @@ Une tâche par itération de la boucle de développement : implémenter, tester
       ligne de sortie/transfert (lots qui seront consommés), état « Péremptions » (périmés
       en rouge, proches en orange, horizon paramétrable `peremption_alerte_jours`, export),
       alerte au tableau de bord et entrée de menu quand `lots_actifs` est activé.
-- [ ] 8. **Finitions** : libellés lisibles du journal d'audit, README et guide utilisateur
-      à jour, revue de code finale.
+- [x] 8. **Finitions** : libellés lisibles du journal d'audit (`lang/fr/activites.php`),
+      README et guide utilisateur (`docs/GUIDE.md`), revue de code finale. Corrigé suite à
+      la revue : verrou + contrôle du statut avant modification/suppression d'un brouillon
+      (un transfert expédié ne peut plus être modifié ni supprimé par un onglet resté
+      ouvert), verrou du transfert d'origine pendant le contrôle d'un retour, retour refusé
+      redevenu retournable, plus de `FOR UPDATE` sur la jointure FEFO, création de lot
+      concurrente sans erreur 500, quantités plafonnées à 1 000 000, contrôle du magasin
+      à l'annulation d'un mouvement.
+
+## Reste à faire hors boucle
+
+- Vérification dans le navigateur des écrans des tâches 2 à 8 (extension Chrome
+  déconnectée pendant toute la boucle ; les écrans sont couverts par les tests HTTP).

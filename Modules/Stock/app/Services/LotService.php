@@ -22,7 +22,8 @@ class LotService
      */
     public function appliquer(Document $document): void
     {
-        $lignes = $document->lignes()->with('lots.lot', 'article')->get();
+        // Même ordre que la mise à jour des stocks totaux, pour éviter les interblocages
+        $lignes = $document->lignes()->with('lots.lot', 'article')->get()->sortBy('article_id');
         $erreurs = [];
 
         foreach ($lignes as $ligne) {
@@ -75,7 +76,8 @@ class LotService
     public function lot(int $articleId, string $numero, ?string $datePeremption): Lot
     {
         $numero = mb_strtoupper(trim($numero));
-        $lot = Lot::firstOrCreate(['article_id' => $articleId, 'numero' => $numero], ['date_peremption' => $datePeremption]);
+        // createOrFirst : deux saisies simultanées d'un nouveau lot ne se heurtent pas à l'index unique
+        $lot = Lot::createOrFirst(['article_id' => $articleId, 'numero' => $numero], ['date_peremption' => $datePeremption]);
 
         if ($datePeremption && $lot->date_peremption && $lot->date_peremption->toDateString() !== $datePeremption) {
             throw ValidationException::withMessages(['lignes' => [
@@ -129,7 +131,9 @@ class LotService
     {
         $restant = $ligne->quantite;
 
-        foreach ($this->requeteFefo($magasinId, [$ligne->article_id])->lockForUpdate()->get() as $disponible) {
+        // Pas de verrou ici : la ligne `stocks` (magasin, article) est déjà verrouillée par
+        // MouvementService::appliquer, ce qui sérialise les mouvements de lots de cet article
+        foreach ($this->requeteFefo($magasinId, [$ligne->article_id])->get() as $disponible) {
             if ($restant <= 0) {
                 break;
             }
