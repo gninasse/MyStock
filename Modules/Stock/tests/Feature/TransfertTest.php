@@ -263,4 +263,51 @@ class TransfertTest extends TestCase
         $this->assertSame([50, 10], [$this->stock($this->source), $this->stock($this->destination)]);
         $this->assertDatabaseMissing('documents', ['type' => Document::RECEPTION]);
     }
+
+    protected function retourner(User $user, Document $origine, int $quantite)
+    {
+        return $this->actingAs($user)->postJson(route('stock.saisie.store', 'transferts'), [
+            'action' => 'valider',
+            'date_mouvement' => '2026-05-22',
+            'magasin_id' => $this->destination->id,
+            'magasin_destination_id' => $this->source->id,
+            'document_origine_id' => $origine->id,
+            'lignes' => [['article_id' => $this->papier->id, 'quantite' => $quantite]],
+        ]);
+    }
+
+    public function test_cas_3_retour_apres_reception(): void
+    {
+        $this->expedier($this->expediteur);
+        $origine = $this->transfert();
+        app(TransfertService::class)->receptionner($origine, [$this->papier->id => 20], null, $this->recepteur);
+
+        // Formulaire pré-rempli depuis la fiche du transfert reçu
+        $this->actingAs($this->recepteur)->get(route('stock.documents.show', $origine->id))->assertSee('Retourner au magasin source');
+        $this->get(route('stock.documents.retour', $origine->id))->assertOk()
+            ->assertSee('Retour du transfert')->assertSee('&quot;quantite&quot;:20', false);
+
+        $this->retourner($this->recepteur, $origine, 21)->assertStatus(422)->assertJsonValidationErrors('lignes');
+        $this->retourner($this->recepteur, $origine, 5)->assertOk()->assertJsonPath('data.statut', Document::EN_TRANSIT);
+
+        $retour = Document::where('document_origine_id', $origine->id)->where('type', Document::TRANSFERT)->firstOrFail();
+        app(TransfertService::class)->receptionner($retour, [$this->papier->id => 5], null, $this->expediteur);
+
+        $this->assertSame([35, 25], [$this->stock($this->source), $this->stock($this->destination)]);
+
+        // Il ne reste que 15 à retourner
+        $this->retourner($this->recepteur, $origine, 16)->assertStatus(422);
+        $this->retourner($this->recepteur, $origine, 15)->assertOk();
+        $this->get(route('stock.documents.retour', $origine->id))->assertStatus(409);
+    }
+
+    public function test_retour_impossible_depuis_un_autre_magasin(): void
+    {
+        $this->expedier($this->expediteur);
+        $origine = $this->transfert();
+        app(TransfertService::class)->receptionner($origine, [$this->papier->id => 20], null, $this->recepteur);
+
+        // L'expéditeur n'a pas accès au magasin destinataire : pas de retour
+        $this->actingAs($this->expediteur)->get(route('stock.documents.retour', $origine->id))->assertForbidden();
+    }
 }

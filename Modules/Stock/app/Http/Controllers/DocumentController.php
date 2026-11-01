@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\User;
+use Modules\Referentiel\Models\Article;
 use Modules\Referentiel\Models\Categorie;
 use Modules\Referentiel\Models\Magasin;
 use Modules\Referentiel\Services\PerimetreMagasins;
 use Modules\Stock\Http\Requests\DocumentRequest;
 use Modules\Stock\Models\Document;
+use Modules\Stock\Models\LigneMouvement;
 use Modules\Stock\Services\MouvementService;
 use Modules\Stock\Services\TransfertService;
 
@@ -94,6 +96,9 @@ class DocumentController extends Controller
 
         return view('stock::documents.show', [
             'document' => $document,
+            'peutRetourner' => $document->type === Document::TRANSFERT && $document->statut === Document::VALIDE
+                && $user->can('stock.transferts.saisir') && $this->perimetre->peutAcceder($user, $document->magasinDestination)
+                && $this->transferts->quantitesRetournables($document),
             'peutReceptionner' => $document->type === Document::TRANSFERT && $document->statut === Document::EN_TRANSIT
                 && $user->can('stock.transferts.receptionner') && $this->perimetre->peutAcceder($user, $document->magasinDestination),
             'peutAnnulerTransfert' => $document->type === Document::TRANSFERT && $document->statut === Document::EN_TRANSIT
@@ -114,9 +119,40 @@ class DocumentController extends Controller
         ]));
     }
 
+    /**
+     * Retour vers le magasin source d'un transfert reçu : nouveau transfert inverse,
+     * pré-rempli avec les quantités encore retournables.
+     */
+    public function retour(Request $request, $id)
+    {
+        $origine = Document::with('magasinDestination')->where('type', Document::TRANSFERT)->findOrFail($id);
+        $this->autoriserType($request->user(), Document::TRANSFERT);
+        $this->autoriserMagasin($request->user(), $origine->magasinDestination);
+
+        $retournables = $this->transferts->quantitesRetournables($origine);
+        abort_unless($retournables, 409, 'Rien à retourner pour ce transfert.');
+
+        $retour = new Document([
+            'type' => Document::TRANSFERT,
+            'date_mouvement' => now(),
+            'statut' => Document::BROUILLON,
+            'magasin_id' => $origine->magasin_destination_id,
+            'magasin_destination_id' => $origine->magasin_id,
+            'document_origine_id' => $origine->id,
+            'commentaire' => "Retour du transfert {$origine->reference}",
+        ]);
+        $retour->setRelation('lignes', collect($retournables)->map(fn ($quantite, $articleId) => (new LigneMouvement([
+            'article_id' => $articleId,
+            'quantite' => $quantite,
+        ]))->setRelation('article', Article::find($articleId)))->values());
+        $retour->setRelation('documentOrigine', $origine);
+
+        return $this->formulaire($request, $retour);
+    }
+
     public function modifier(Request $request, $id)
     {
-        $document = Document::with('lignes.article')->findOrFail($id);
+        $document = Document::with('lignes.article', 'documentOrigine')->findOrFail($id);
         $this->autoriserDocument($request->user(), $document);
         abort_unless($document->estBrouillon(), 403, 'Seul un brouillon peut être modifié.');
 

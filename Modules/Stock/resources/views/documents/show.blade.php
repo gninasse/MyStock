@@ -27,6 +27,9 @@
         @if ($document->estBrouillon() && $permissionSaisie && auth()->user()->can($permissionSaisie))
             <a href="{{ route('stock.documents.edit', $document->id) }}" class="btn btn-primary btn-sm ms-auto"><i class="fas fa-edit"></i> Modifier</a>
         @endif
+        @if ($peutRetourner)
+            <a href="{{ route('stock.documents.retour', $document->id) }}" class="btn btn-outline-primary btn-sm ms-auto"><i class="fas fa-undo"></i> Retourner au magasin source</a>
+        @endif
         @if ($peutReceptionner)
             <a href="{{ route('stock.transferts.reception', $document->id) }}" class="btn btn-success btn-sm ms-auto"><i class="fas fa-dolly"></i> Réceptionner</a>
         @endif
@@ -60,7 +63,7 @@
                 <dt class="col-sm-3">Motif de l'écart</dt><dd class="col-sm-9">{{ $document->motif_ecart }}</dd>
             @endif
             @if ($document->documentOrigine)
-                <dt class="col-sm-3">Transfert d'origine</dt>
+                <dt class="col-sm-3">{{ $estTransfert ? 'Retour du transfert' : 'Transfert d\'origine' }}</dt>
                 <dd class="col-sm-9"><a href="{{ route('stock.documents.show', $document->documentOrigine->id) }}">{{ $document->documentOrigine->reference }}</a></dd>
             @endif
             @if ($document->documentsLies->isNotEmpty())

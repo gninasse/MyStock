@@ -15,6 +15,7 @@ Route::middleware(['auth'])->prefix('stock')->name('stock.')->group(function () 
         });
         // Les droits de saisie dépendent du type du document : contrôlés dans le contrôleur
         Route::get('/{id}/modifier', [DocumentController::class, 'modifier'])->name('edit');
+        Route::get('/{id}/retour', [DocumentController::class, 'retour'])->middleware('permission:stock.transferts.saisir')->name('retour');
         Route::put('/{id}', [DocumentController::class, 'update'])->name('update');
         Route::delete('/{id}', [DocumentController::class, 'destroy'])->name('destroy');
         Route::post('/{id}/annuler', [DocumentController::class, 'annuler'])->middleware('permission:stock.documents.annuler')->name('annuler');

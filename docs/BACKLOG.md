@@ -23,8 +23,9 @@ Une tâche par itération de la boucle de développement : implémenter, tester
       formulaire de réception (quantité reçue par ligne, écart calculé, motif obligatoire
       si écart), refus complet avec motif, bouton « Réceptionner » sur la fiche.
       ⚠ Vérification navigateur à refaire (extension Chrome déconnectée).
-- [ ] 4. **Retours** : depuis un transfert reçu, créer un transfert inverse pré-rempli
-      lié à l'original (cas 3), limité aux quantités reçues.
+- [x] 4. **Retours** : bouton « Retourner au magasin source » sur un transfert reçu,
+      formulaire de transfert inverse pré-rempli (lié par `document_origine_id`),
+      quantités limitées au reçu moins les retours déjà expédiés (contrôle à l'expédition).
 - [ ] 5. **États et tableau de bord** : état « Transferts en transit », transferts dans
       le journal et la fiche de stock (provenance / destination), widget du tableau de bord.
 - [ ] 6. **Lots et péremption (données)** : lots par article (numéro, date de péremption),

@@ -31,6 +31,8 @@ class MouvementService
                 'magasin_id' => $donnees['magasin_id'],
                 'commentaire' => $donnees['commentaire'] ?? null,
                 'magasin_destination_id' => $type === Document::TRANSFERT ? ($donnees['magasin_destination_id'] ?? null) : null,
+                // Retour : transfert d'origine (contrôlé à l'expédition)
+                'document_origine_id' => $type === Document::TRANSFERT ? ($donnees['document_origine_id'] ?? null) : null,
                 'direction_id' => $type === Document::SORTIE ? ($donnees['direction_id'] ?? null) : null,
                 'service_id' => $type === Document::SORTIE ? ($donnees['service_id'] ?? null) : null,
                 'unite_id' => $type === Document::SORTIE ? ($donnees['unite_id'] ?? null) : null,

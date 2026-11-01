@@ -25,6 +25,7 @@
          'segment' => $segment,
          'magasin_id' => $document->magasin_id,
          'magasin_destination_id' => $document->magasin_destination_id,
+         'document_origine_id' => $document->document_origine_id,
          'direction_id' => $document->direction_id,
          'service_id' => $document->service_id,
          'unite_id' => $document->unite_id,
@@ -34,6 +35,14 @@
      data-peut-creer-article="{{ ! $debite && auth()->user()->can('referentiel.articles.store') ? 1 : 0 }}">
 
     <div class="alert alert-danger d-none" id="erreurs"></div>
+
+    @if ($document->documentOrigine)
+        <div class="alert alert-info">
+            <i class="fas fa-undo"></i> Retour du transfert
+            <a href="{{ route('stock.documents.show', $document->documentOrigine->id) }}">{{ $document->documentOrigine->reference }}</a>
+            vers son magasin source. Les quantités ne peuvent pas dépasser ce qui a été reçu.
+        </div>
+    @endif
 
     <form id="saisieForm" novalidate>
         <div class="card mb-3">

@@ -23,6 +23,7 @@ class DocumentRequest extends FormRequest
             'date_mouvement' => ['required', 'date_format:Y-m-d'],
             'magasin_id' => ['required', 'integer', 'exists:magasins,id'],
             'magasin_destination_id' => ['nullable', 'integer', 'exists:magasins,id', 'different:magasin_id'],
+            'document_origine_id' => ['nullable', 'integer', 'exists:documents,id'],
             'direction_id' => ['nullable', 'integer', 'exists:directions,id'],
             'service_id' => ['nullable', 'integer', 'exists:services,id'],
             'unite_id' => ['nullable', 'integer', 'exists:unites,id'],

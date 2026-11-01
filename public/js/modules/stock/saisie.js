@@ -266,7 +266,10 @@ $(function () {
             commentaire: $('#commentaire').val(),
             lignes: [...lignes.values()].map((l) => ({ article_id: l.id, quantite: l.quantite }))
         };
-        if (doc.type === 'TRANSFERT') donnees.magasin_destination_id = $('#magasin_destination_id').val();
+        if (doc.type === 'TRANSFERT') {
+            donnees.magasin_destination_id = $('#magasin_destination_id').val();
+            donnees.document_origine_id = doc.document_origine_id;
+        }
         if (estSortie) {
             Object.assign(donnees, {
                 direction_id: $('#direction_id').val(),

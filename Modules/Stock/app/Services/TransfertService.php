@@ -32,6 +32,9 @@ class TransfertService
             }
 
             $this->mouvements->controler($document);
+            if ($document->document_origine_id) {
+                $this->controlerRetour($document);
+            }
             $this->mouvements->appliquer($document, $user, Document::EN_TRANSIT);
             $this->mouvements->journaliser($document, 'transfert_expedie', $user, ['magasin_destination_id' => $document->magasin_destination_id]);
 
@@ -147,6 +150,58 @@ class TransfertService
 
             return $reintegration;
         });
+    }
+
+    /**
+     * Quantités encore retournables d'un transfert reçu : reçu moins les retours
+     * déjà expédiés (non annulés). [article_id => quantité > 0]
+     */
+    public function quantitesRetournables(Document $transfert, ?int $saufRetourId = null): array
+    {
+        if ($transfert->type !== Document::TRANSFERT || $transfert->statut !== Document::VALIDE) {
+            return [];
+        }
+
+        $retournees = DB::table('lignes_mouvement as l')
+            ->join('documents as d', 'd.id', '=', 'l.document_id')
+            ->where('d.type', Document::TRANSFERT)
+            ->where('d.document_origine_id', $transfert->id)
+            ->whereIn('d.statut', [Document::EN_TRANSIT, Document::VALIDE])
+            ->when($saufRetourId, fn ($q) => $q->where('d.id', '!=', $saufRetourId))
+            ->groupBy('l.article_id')
+            ->selectRaw('l.article_id, SUM(l.quantite) as total')
+            ->pluck('total', 'article_id');
+
+        return $transfert->lignes()->get()
+            ->mapWithKeys(fn ($l) => [$l->article_id => (int) $l->quantite_recue - (int) ($retournees[$l->article_id] ?? 0)])
+            ->filter(fn ($q) => $q > 0)
+            ->all();
+    }
+
+    /**
+     * Un retour renvoie au magasin source tout ou partie de ce qu'il a reçu, sans plus.
+     */
+    protected function controlerRetour(Document $retour): void
+    {
+        $origine = Document::with('lignes')->find($retour->document_origine_id);
+
+        if (! $origine || $origine->type !== Document::TRANSFERT || $origine->statut !== Document::VALIDE
+            || $retour->magasin_id !== $origine->magasin_destination_id || $retour->magasin_destination_id !== $origine->magasin_id) {
+            throw ValidationException::withMessages(['document' => 'Un retour doit partir du magasin destinataire d\'un transfert reçu, vers son magasin source.']);
+        }
+
+        $retournables = $this->quantitesRetournables($origine, $retour->id);
+        $erreurs = [];
+        foreach ($retour->lignes as $ligne) {
+            $maximum = $retournables[$ligne->article_id] ?? 0;
+            if ($ligne->quantite > $maximum) {
+                $erreurs[] = "Retour de {$ligne->article->designation} limité à {$maximum} (quantité reçue par le transfert {$origine->reference}, moins les retours déjà faits).";
+            }
+        }
+
+        if ($erreurs) {
+            throw ValidationException::withMessages(['lignes' => $erreurs]);
+        }
     }
 
     /**
