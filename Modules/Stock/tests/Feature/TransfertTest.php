@@ -216,4 +216,51 @@ class TransfertTest extends TestCase
         $operateur = User::factory()->create()->assignRole('operateur');
         $this->actingAs($operateur)->get(route('stock.saisie.create', 'transferts'))->assertForbidden();
     }
+
+    public function test_ecrans_de_reception(): void
+    {
+        $this->expedier($this->expediteur);
+        $transfert = $this->transfert();
+
+        $this->actingAs($this->recepteur)->get(route('stock.transferts.a-receptionner'))
+            ->assertOk()->assertSee($transfert->reference)->assertSee('Réceptionner');
+        $this->get(route('stock.documents.show', $transfert->id))->assertSee('Réceptionner');
+        $this->get(route('stock.transferts.reception', $transfert->id))
+            ->assertOk()->assertSee('Quantités reçues')->assertSee('réintégrée dans le stock de Magasin A');
+
+        // L'expéditeur n'a pas accès au magasin destinataire
+        $this->actingAs($this->expediteur)->get(route('stock.transferts.a-receptionner'))->assertOk()->assertDontSee($transfert->reference);
+        $this->get(route('stock.transferts.reception', $transfert->id))->assertForbidden();
+    }
+
+    public function test_reception_partielle_par_formulaire(): void
+    {
+        $this->expedier($this->expediteur);
+        $transfert = $this->transfert();
+        $url = route('stock.transferts.receptionner', $transfert->id);
+
+        $this->actingAs($this->recepteur)->postJson($url, ['quantites' => [$this->papier->id => 12]])
+            ->assertStatus(422)->assertJsonValidationErrors('lignes');
+
+        $this->postJson($url, ['quantites' => [$this->papier->id => 12], 'motif' => '8 rames manquantes'])
+            ->assertOk()->assertJsonPath('success', true);
+
+        $this->assertSame([38, 22], [$this->stock($this->source), $this->stock($this->destination)]);
+
+        // Déjà réceptionné : plus accessible
+        $this->get(route('stock.transferts.reception', $transfert->id))->assertStatus(409);
+        $this->get(route('stock.documents.show', $transfert->id))->assertSee('Reçu')->assertSee('8 rames manquantes');
+    }
+
+    public function test_refus_complet(): void
+    {
+        $this->expedier($this->expediteur);
+
+        $this->actingAs($this->recepteur)
+            ->postJson(route('stock.transferts.receptionner', $this->transfert()->id), ['quantites' => [$this->papier->id => 0], 'motif' => 'Commande erronée'])
+            ->assertOk();
+
+        $this->assertSame([50, 10], [$this->stock($this->source), $this->stock($this->destination)]);
+        $this->assertDatabaseMissing('documents', ['type' => Document::RECEPTION]);
+    }
 }

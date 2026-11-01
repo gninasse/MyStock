@@ -108,8 +108,8 @@
                 </ul>
               </li>
               @endcanany
-              @canany(['stock.entrees.saisir', 'stock.sorties.saisir', 'stock.transferts.saisir', 'stock.documents.index'])
-              <li class="nav-item {{ request()->routeIs('stock.saisie.*', 'stock.documents.*') ? 'menu-open' : '' }}">
+              @canany(['stock.entrees.saisir', 'stock.sorties.saisir', 'stock.transferts.saisir', 'stock.transferts.receptionner', 'stock.documents.index'])
+              <li class="nav-item {{ request()->routeIs('stock.saisie.*', 'stock.documents.*', 'stock.transferts.*') ? 'menu-open' : '' }}">
                 <a href="#" class="nav-link {{ request()->routeIs('stock.saisie.*', 'stock.documents.*') ? 'active' : '' }}">
                   <i class="nav-icon bi bi-arrow-left-right"></i>
                   <p>
@@ -142,6 +142,19 @@
                     <a href="{{ route('stock.saisie.create', 'transferts') }}" class="nav-link {{ request()->is('stock/transferts/*') ? 'active' : '' }}">
                       <i class="nav-icon bi bi-truck"></i>
                       <p>Nouveau transfert</p>
+                    </a>
+                  </li>
+                  @endcan
+                  @can('stock.transferts.receptionner')
+                  <li class="nav-item">
+                    <a href="{{ route('stock.transferts.a-receptionner') }}" class="nav-link {{ request()->routeIs('stock.transferts.*') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-box-seam"></i>
+                      <p>
+                        À réceptionner
+                        @if (($nombreTransfertsAReceptionner ?? 0) > 0)
+                          <span class="nav-badge badge text-bg-warning me-3" title="Transferts en attente de réception">{{ $nombreTransfertsAReceptionner }}</span>
+                        @endif
+                      </p>
                     </a>
                   </li>
                   @endcan

@@ -94,6 +94,8 @@ class DocumentController extends Controller
 
         return view('stock::documents.show', [
             'document' => $document,
+            'peutReceptionner' => $document->type === Document::TRANSFERT && $document->statut === Document::EN_TRANSIT
+                && $user->can('stock.transferts.receptionner') && $this->perimetre->peutAcceder($user, $document->magasinDestination),
             'peutAnnulerTransfert' => $document->type === Document::TRANSFERT && $document->statut === Document::EN_TRANSIT
                 && $user->can('stock.transferts.saisir') && $this->perimetre->peutAcceder($user, $document->magasin),
             'unitesMesure' => config('referentiel.unites_mesure'),

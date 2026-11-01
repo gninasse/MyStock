@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Stock\Http\Controllers\DocumentController;
 use Modules\Stock\Http\Controllers\InventaireController;
 use Modules\Stock\Http\Controllers\SaisieController;
+use Modules\Stock\Http\Controllers\TransfertController;
 
 Route::middleware(['auth'])->prefix('stock')->name('stock.')->group(function () {
     Route::prefix('documents')->name('documents.')->group(function () {
@@ -22,6 +23,12 @@ Route::middleware(['auth'])->prefix('stock')->name('stock.')->group(function () 
 
     Route::get('/{type}/nouvelle', [DocumentController::class, 'creer'])->whereIn('type', ['entrees', 'sorties', 'transferts'])->name('saisie.create');
     Route::post('/{type}', [DocumentController::class, 'store'])->whereIn('type', ['entrees', 'sorties', 'transferts'])->name('saisie.store');
+
+    Route::prefix('transferts')->name('transferts.')->middleware('permission:stock.transferts.receptionner')->group(function () {
+        Route::get('/a-receptionner', [TransfertController::class, 'aReceptionner'])->name('a-receptionner');
+        Route::get('/{id}/reception', [TransfertController::class, 'reception'])->whereNumber('id')->name('reception');
+        Route::post('/{id}/reception', [TransfertController::class, 'receptionner'])->whereNumber('id')->name('receptionner');
+    });
 
     Route::prefix('inventaires')->name('inventaires.')->middleware('permission:stock.inventaires.saisir')->group(function () {
         Route::get('/', [InventaireController::class, 'index'])->name('index');

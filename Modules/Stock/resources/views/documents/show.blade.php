@@ -27,8 +27,11 @@
         @if ($document->estBrouillon() && $permissionSaisie && auth()->user()->can($permissionSaisie))
             <a href="{{ route('stock.documents.edit', $document->id) }}" class="btn btn-primary btn-sm ms-auto"><i class="fas fa-edit"></i> Modifier</a>
         @endif
+        @if ($peutReceptionner)
+            <a href="{{ route('stock.transferts.reception', $document->id) }}" class="btn btn-success btn-sm ms-auto"><i class="fas fa-dolly"></i> Réceptionner</a>
+        @endif
         @if ($peutAnnulerTransfert)
-            <button type="button" class="btn btn-outline-danger btn-sm ms-auto" id="btn-annuler-transfert"
+            <button type="button" class="btn btn-outline-danger btn-sm {{ $peutReceptionner ? 'ms-2' : 'ms-auto' }}" id="btn-annuler-transfert"
                     data-url="{{ route('stock.documents.annuler-transfert', $document->id) }}" data-reference="{{ $document->reference }}">
                 <i class="fas fa-undo"></i> Annuler le transfert
             </button>

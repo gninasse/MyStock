@@ -19,10 +19,10 @@ Une tâche par itération de la boucle de développement : implémenter, tester
       RIN-…) ou comptée en perte (`transfert_ecart`). Annulation avant réception =
       réintégration intégrale. Permissions `stock.transferts.saisir` / `.receptionner`.
       ⚠ Vérification navigateur à refaire (extension Chrome déconnectée pendant l'itération).
-- [ ] 3. **Réception des transferts** : écran « À réceptionner » (badge menu),
-      saisie de la quantité reçue par ligne, motif obligatoire si écart.
-      Écart traité selon le paramètre : `RETOUR_SOURCE` (recrédité à la source, cas 2)
-      ou `PERTE` (perte en transit tracée). Permission `stock.transferts.receptionner`.
+- [x] 3. **Réception des transferts** : écran « À réceptionner » (badge menu),
+      formulaire de réception (quantité reçue par ligne, écart calculé, motif obligatoire
+      si écart), refus complet avec motif, bouton « Réceptionner » sur la fiche.
+      ⚠ Vérification navigateur à refaire (extension Chrome déconnectée).
 - [ ] 4. **Retours** : depuis un transfert reçu, créer un transfert inverse pré-rempli
       lié à l'original (cas 3), limité aux quantités reçues.
 - [ ] 5. **États et tableau de bord** : état « Transferts en transit », transferts dans

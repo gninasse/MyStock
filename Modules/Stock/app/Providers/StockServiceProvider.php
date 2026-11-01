@@ -3,7 +3,9 @@
 namespace Modules\Stock\Providers;
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Modules\Stock\Http\Controllers\TransfertController;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -27,6 +29,20 @@ class StockServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+        $this->registerSidebarCompteurs();
+    }
+
+    /**
+     * Nombre de transferts en transit vers les magasins de l'utilisateur (badge du menu).
+     */
+    protected function registerSidebarCompteurs(): void
+    {
+        View::composer('core::layouts.partials.sidebar', function ($view) {
+            $user = auth()->user();
+            $view->with('nombreTransfertsAReceptionner', $user?->can('stock.transferts.receptionner')
+                ? app(TransfertController::class)->enAttente($user)->count()
+                : 0);
+        });
     }
 
     /**
