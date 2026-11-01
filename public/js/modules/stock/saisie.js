@@ -12,6 +12,7 @@ $(function () {
     // Sorties et transferts débitent le magasin source : stock disponible affiché et contrôlé
     const debite = estSortie || doc.type === 'TRANSFERT';
     const peutCreerArticle = $page.data('peut-creer-article') === 1;
+    const saisieLots = $page.data('saisie-lots') === 1;
 
     // article_id => { id, code, designation, unite_mesure, quantite, stock }
     const lignes = new Map();
@@ -52,7 +53,7 @@ $(function () {
     function afficherLignes() {
         $('#nb-lignes').text(lignes.size);
         if (!lignes.size) {
-            $('#lignes').html(`<tr><td colspan="5" class="text-center text-muted">Aucun article</td></tr>`);
+            $('#lignes').html(`<tr><td colspan="7" class="text-center text-muted">Aucun article</td></tr>`);
             return;
         }
 
@@ -63,6 +64,9 @@ $(function () {
                     <td>${echapper(l.designation)} <small class="text-muted">(${echapper(l.code)})</small></td>
                     <td><input type="number" class="form-control form-control-sm qte-ligne" min="1" step="1" value="${l.quantite}"></td>
                     <td>${echapper(unite(l.unite_mesure))}</td>
+                    ${saisieLots ? `
+                        <td><input type="text" class="form-control form-control-sm text-uppercase lot-numero" maxlength="50" value="${echapper(l.lot_numero ?? '')}" placeholder="Facultatif" aria-label="Numéro de lot"></td>
+                        <td><input type="date" class="form-control form-control-sm lot-peremption" value="${echapper(l.date_peremption ?? '')}" aria-label="Date de péremption"></td>` : ''}
                     ${debite ? `<td>${l.stock ?? '…'}</td>` : ''}
                     <td class="text-end"><button type="button" class="btn btn-sm btn-link text-danger btn-retirer" title="Retirer"><i class="fas fa-trash"></i></button></td>
                 </tr>`;
@@ -74,6 +78,11 @@ $(function () {
         definirQuantite(lignes.get(id), parseInt(this.value, 10) || 0);
         afficherLignes();
         afficherFrequents();
+    });
+
+    $('#lignes').on('change', '.lot-numero, .lot-peremption', function () {
+        const ligne = lignes.get($(this).closest('tr').data('id'));
+        ligne[$(this).is('.lot-numero') ? 'lot_numero' : 'date_peremption'] = this.value.trim();
     });
 
     $('#lignes').on('click', '.btn-retirer', function () {
@@ -264,7 +273,11 @@ $(function () {
             date_mouvement: $('#date_mouvement').val(),
             magasin_id: $('#magasin_id').val(),
             commentaire: $('#commentaire').val(),
-            lignes: [...lignes.values()].map((l) => ({ article_id: l.id, quantite: l.quantite }))
+            lignes: [...lignes.values()].map((l) => ({
+                article_id: l.id,
+                quantite: l.quantite,
+                ...(saisieLots && l.lot_numero ? { lot_numero: l.lot_numero, date_peremption: l.date_peremption || null } : {})
+            }))
         };
         if (doc.type === 'TRANSFERT') {
             donnees.magasin_destination_id = $('#magasin_destination_id').val();

@@ -7,6 +7,8 @@
     $debite = $estSortie || $estTransfert;
     $titre = $estTransfert ? 'Transfert entre magasins' : ($estSortie ? 'Sortie de stock' : 'Entrée de stock');
     $nouveau = $estTransfert ? 'Nouveau transfert' : 'Nouvelle '.($estSortie ? 'sortie' : 'entrée');
+    // Entrée avec suivi des lots : numéro de lot et date de péremption par ligne
+    $saisieLots = ! $debite && \Modules\Referentiel\Services\Parametres::get('lots_actifs');
     $boutonValider = $estTransfert ? 'Expédier le transfert' : 'Valider '.($estSortie ? 'la sortie' : 'l\'entrée');
 @endphp
 
@@ -32,6 +34,7 @@
      ]) }}"
      data-lignes="{{ json_encode($lignes) }}"
      data-unites="{{ json_encode($unitesMesure) }}"
+     data-saisie-lots="{{ $saisieLots ? 1 : 0 }}"
      data-peut-creer-article="{{ ! $debite && auth()->user()->can('referentiel.articles.store') ? 1 : 0 }}">
 
     <div class="alert alert-danger d-none" id="erreurs"></div>
@@ -145,6 +148,7 @@
                             <th>Article</th>
                             <th style="width: 140px">Quantité</th>
                             <th>Unité</th>
+                            @if ($saisieLots)<th style="width: 160px">N° de lot</th><th style="width: 170px">Péremption</th>@endif
                             @if ($debite)<th>Stock dispo.</th>@endif
                             <th class="text-end"></th>
                         </tr>

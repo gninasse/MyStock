@@ -15,6 +15,8 @@ use Modules\Stock\Models\Stock;
  */
 class MouvementService
 {
+    public function __construct(protected LotService $lots) {}
+
     /**
      * Crée ou met à jour un brouillon. $donnees['lignes'] : [['article_id' => …, 'quantite' => …], …]
      * Un même article saisi plusieurs fois est regroupé et ses quantités additionnées.
@@ -52,11 +54,23 @@ class MouvementService
             $sens = $type === Document::ENTREE ? 1 : -1;
             collect($donnees['lignes'] ?? [])
                 ->groupBy('article_id')
-                ->each(fn ($lignes, $articleId) => $document->lignes()->create([
-                    'article_id' => $articleId,
-                    'quantite' => $lignes->sum('quantite'),
-                    'sens' => $sens,
-                ]));
+                ->each(function ($lignes, $articleId) use ($document, $sens, $type) {
+                    $ligne = $document->lignes()->create([
+                        'article_id' => $articleId,
+                        'quantite' => $lignes->sum('quantite'),
+                        'sens' => $sens,
+                    ]);
+
+                    // Entrée : numéro de lot et date de péremption saisis par ligne
+                    if ($type === Document::ENTREE) {
+                        $ventilation = [];
+                        foreach ($lignes->filter(fn ($l) => filled($l['lot_numero'] ?? null)) as $l) {
+                            $lot = $this->lots->lot($articleId, $l['lot_numero'], $l['date_peremption'] ?? null);
+                            $ventilation[$lot->id] = ($ventilation[$lot->id] ?? 0) + (int) $l['quantite'];
+                        }
+                        $this->lots->ventiler($ligne, $ventilation);
+                    }
+                });
 
             $this->journaliser($document, $document->wasRecentlyCreated ? 'brouillon_cree' : 'brouillon_modifie', $user);
 
@@ -125,12 +139,14 @@ class MouvementService
                 'document_annule_id' => $document->id,
             ]);
 
-            foreach ($document->lignes as $ligne) {
-                $inverse->lignes()->create([
+            foreach ($document->lignes()->with('lots')->get() as $ligne) {
+                $ligneInverse = $inverse->lignes()->create([
                     'article_id' => $ligne->article_id,
                     'quantite' => $ligne->quantite,
                     'sens' => -$ligne->sens,
                 ]);
+                // Mêmes lots que le mouvement annulé
+                $this->lots->ventiler($ligneInverse, $ligne->lots->pluck('quantite', 'lot_id')->all());
             }
 
             $this->appliquer($inverse, $user);
@@ -264,6 +280,8 @@ class MouvementService
         if ($insuffisants) {
             throw ValidationException::withMessages(['lignes' => $insuffisants]);
         }
+
+        $this->lots->appliquer($document);
 
         $document->update([
             'reference' => $this->genererReference($document),

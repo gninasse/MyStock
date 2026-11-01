@@ -10,6 +10,7 @@
     }
     $permissionSaisie = ['ENTREE' => 'stock.entrees.saisir', 'SORTIE' => 'stock.sorties.saisir', 'TRANSFERT' => 'stock.transferts.saisir'][$document->type] ?? null;
     $avecReception = $estTransfert && $document->lignes->whereNotNull('quantite_recue')->isNotEmpty();
+    $avecLots = $document->lignes->contains(fn ($l) => $l->lots->isNotEmpty());
 @endphp
 
 @section('header', $libelles[$document->type].' '.($document->reference ?? '(brouillon)'))
@@ -94,7 +95,7 @@
     <div class="card-header"><h3 class="card-title">Articles ({{ $document->lignes->count() }})</h3></div>
     <div class="card-body p-0">
         <table class="table table-striped mb-0">
-            <thead><tr><th>Code</th><th>Désignation</th><th class="text-end">{{ $estTransfert ? 'Expédié' : 'Quantité' }}</th>@if ($avecReception)<th class="text-end">Reçu</th><th class="text-end">Écart</th>@endif<th>Unité</th></tr></thead>
+            <thead><tr><th>Code</th><th>Désignation</th><th class="text-end">{{ $estTransfert ? 'Expédié' : 'Quantité' }}</th>@if ($avecReception)<th class="text-end">Reçu</th><th class="text-end">Écart</th>@endif<th>Unité</th>@if ($avecLots)<th>Lots</th>@endif</tr></thead>
             <tbody>
                 @foreach ($document->lignes as $ligne)
                     <tr>
@@ -106,6 +107,16 @@
                             <td class="text-end {{ $ligne->quantite_recue < $ligne->quantite ? 'text-danger fw-bold' : '' }}">{{ $ligne->quantite_recue - $ligne->quantite ?: '' }}</td>
                         @endif
                         <td>{{ $unitesMesure[$ligne->article->unite_mesure] ?? $ligne->article->unite_mesure }}</td>
+                        @if ($avecLots)
+                            <td class="small">
+                                @foreach ($ligne->lots as $ventilation)
+                                    <div>{{ $ventilation->lot->libelle }} : {{ $ventilation->quantite }}</div>
+                                @endforeach
+                                @if ($ligne->lots->sum('quantite') < $ligne->quantite)
+                                    <div class="text-muted">Sans lot : {{ $ligne->quantite - $ligne->lots->sum('quantite') }}</div>
+                                @endif
+                            </td>
+                        @endif
                     </tr>
                 @endforeach
             </tbody>

@@ -87,7 +87,7 @@ class DocumentController extends Controller
 
     public function show(Request $request, $id)
     {
-        $document = Document::with(['lignes.article', 'magasin', 'magasinDestination', 'direction', 'service', 'unite', 'utilisateur',
+        $document = Document::with(['lignes.article', 'lignes.lots.lot', 'magasin', 'magasinDestination', 'direction', 'service', 'unite', 'utilisateur',
             'validateur', 'recepteur', 'documentAnnule', 'annulation', 'inventaire', 'documentOrigine', 'documentsLies'])
             ->findOrFail($id);
         $user = $request->user();
@@ -152,7 +152,7 @@ class DocumentController extends Controller
 
     public function modifier(Request $request, $id)
     {
-        $document = Document::with('lignes.article', 'documentOrigine')->findOrFail($id);
+        $document = Document::with('lignes.article', 'lignes.lots.lot', 'documentOrigine')->findOrFail($id);
         $this->autoriserDocument($request->user(), $document);
         abort_unless($document->estBrouillon(), 403, 'Seul un brouillon peut être modifié.');
 
@@ -255,6 +255,8 @@ class DocumentController extends Controller
             'designation' => $ligne->article->designation,
             'unite_mesure' => $ligne->article->unite_mesure,
             'quantite' => $ligne->quantite,
+            'lot_numero' => $ligne->lots->first()?->lot->numero,
+            'date_peremption' => $ligne->lots->first()?->lot->date_peremption?->toDateString(),
         ])->values();
 
         return view('stock::documents.saisie', [

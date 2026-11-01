@@ -4,6 +4,7 @@ namespace Modules\Stock\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Referentiel\Models\Article;
 
 class LigneMouvement extends Model
@@ -25,5 +26,10 @@ class LigneMouvement extends Model
     public function article(): BelongsTo
     {
         return $this->belongsTo(Article::class);
+    }
+
+    public function lots(): HasMany
+    {
+        return $this->hasMany(LigneLot::class);
     }
 }

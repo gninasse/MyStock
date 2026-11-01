@@ -45,4 +45,20 @@ return [
         ],
         'defaut' => 'RETOUR_SOURCE',
     ],
+    'lots_actifs' => [
+        'groupe' => 'Lots et péremption',
+        'libelle' => 'Suivre les lots et dates de péremption',
+        'aide' => 'Permet de saisir le numéro de lot et la date de péremption à l\'entrée. Les sorties et transferts consomment alors les lots qui périment en premier (FEFO).',
+        'type' => 'booleen',
+        'defaut' => false,
+    ],
+    'peremption_alerte_jours' => [
+        'groupe' => 'Lots et péremption',
+        'libelle' => 'Alerte de péremption (jours avant la date)',
+        'aide' => 'Un lot en stock qui périme dans ce délai apparaît dans les alertes.',
+        'type' => 'entier',
+        'min' => 1,
+        'max' => 730,
+        'defaut' => 90,
+    ],
 ];

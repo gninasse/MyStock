@@ -30,8 +30,11 @@ Une tâche par itération de la boucle de développement : implémenter, tester
       écarts en rouge, export Excel/PDF, permission `etats.transferts`), provenance et
       destination dans le journal et la fiche de stock, bloc « Transferts en transit » et
       raccourci « Nouveau transfert » au tableau de bord.
-- [ ] 6. **Lots et péremption (données)** : lots par article (numéro, date de péremption),
-      stock par lot, saisie du lot sur les entrées quand la gestion des lots est active.
+- [x] 6. **Lots et péremption (données)** : tables `lots`, `stocks_lots`, `lignes_lots`
+      (ventilation de chaque ligne par lot). Entrées : n° de lot + péremption par ligne
+      (paramètre `lots_actifs`). Sorties, transferts, ajustements négatifs : FEFO automatique
+      puis stock sans lot. Annulations et transferts conservent les lots de bout en bout
+      (réception et écart répartis sur les lots expédiés). Lots affichés sur la fiche document.
 - [ ] 7. **Lots et péremption (sorties, transferts, alertes)** : proposition FEFO à la sortie
       et au transfert, lot suivi de bout en bout, alerte et état « Péremptions proches ».
 - [ ] 8. **Finitions** : libellés lisibles du journal d'audit, README et guide utilisateur

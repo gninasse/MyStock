@@ -16,7 +16,11 @@ use Modules\Stock\Models\Document;
  */
 class TransfertService
 {
-    public function __construct(protected MouvementService $mouvements, protected PerimetreMagasins $perimetre) {}
+    public function __construct(
+        protected MouvementService $mouvements,
+        protected PerimetreMagasins $perimetre,
+        protected LotService $lots,
+    ) {}
 
     /**
      * Expédie un brouillon de transfert : débite la source, puis réceptionne
@@ -101,19 +105,24 @@ class TransfertService
                 throw ValidationException::withMessages(['lignes' => $erreurs]);
             }
 
+            // Les lots suivent la marchandise : la quantité reçue est prise sur les lots
+            // expédiés dans l'ordre FEFO, le reste correspond à l'écart.
+            $lotsRecus = [];
+            $lotsEcart = [];
             foreach ($lignes as $ligne) {
                 $ligne->update(['quantite_recue' => $recues[$ligne->id]]);
+                [$lotsRecus[$ligne->article_id], $lotsEcart[$ligne->article_id]] = $this->lots->repartir($ligne, $recues[$ligne->id]);
             }
 
             $credits = $lignes->filter(fn ($l) => $recues[$l->id] > 0)->mapWithKeys(fn ($l) => [$l->article_id => $recues[$l->id]])->all();
             if ($credits) {
                 $this->creerMouvementLie($transfert, Document::RECEPTION, $transfert->magasin_destination_id, $credits,
-                    "Réception du transfert {$transfert->reference}", $user);
+                    "Réception du transfert {$transfert->reference}", $user, $lotsRecus);
             }
 
             if ($ecarts && Parametres::get('transfert_ecart') === 'RETOUR_SOURCE') {
                 $this->creerMouvementLie($transfert, Document::REINTEGRATION, $transfert->magasin_id, $ecarts,
-                    "Quantité non reçue du transfert {$transfert->reference}", $user);
+                    "Quantité non reçue du transfert {$transfert->reference}", $user, $lotsEcart);
             }
 
             $transfert->update([
@@ -140,10 +149,12 @@ class TransfertService
                 throw ValidationException::withMessages(['document' => 'Seul un transfert en transit (pas encore reçu) peut être annulé.']);
             }
 
-            $quantites = $transfert->lignes()->pluck('quantite', 'article_id')->all();
+            $lignes = $transfert->lignes()->with('lots')->get();
             $transfert->lignes()->update(['quantite_recue' => 0]);
-            $reintegration = $this->creerMouvementLie($transfert, Document::REINTEGRATION, $transfert->magasin_id, $quantites,
-                "Annulation du transfert {$transfert->reference}", $user);
+            $reintegration = $this->creerMouvementLie($transfert, Document::REINTEGRATION, $transfert->magasin_id,
+                $lignes->pluck('quantite', 'article_id')->all(),
+                "Annulation du transfert {$transfert->reference}", $user,
+                $lignes->mapWithKeys(fn ($l) => [$l->article_id => $l->lots->pluck('quantite', 'lot_id')->all()])->all());
 
             $transfert->update(['statut' => Document::ANNULE]);
             $this->mouvements->journaliser($transfert, 'transfert_annule', $user, ['reintegre_par' => $reintegration->reference]);
@@ -205,9 +216,10 @@ class TransfertService
     }
 
     /**
-     * Document validé immédiatement, rattaché au transfert : [article_id => quantité] ajoutées au magasin.
+     * Document validé immédiatement, rattaché au transfert : [article_id => quantité] ajoutées au magasin,
+     * $lots : [article_id => [lot_id => quantité]] pour créditer les lots concernés.
      */
-    protected function creerMouvementLie(Document $transfert, string $type, int $magasinId, array $quantites, string $commentaire, User $user): Document
+    protected function creerMouvementLie(Document $transfert, string $type, int $magasinId, array $quantites, string $commentaire, User $user, array $lots = []): Document
     {
         $document = Document::create([
             'type' => $type,
@@ -220,7 +232,8 @@ class TransfertService
         ]);
 
         foreach ($quantites as $articleId => $quantite) {
-            $document->lignes()->create(['article_id' => $articleId, 'quantite' => $quantite, 'sens' => 1]);
+            $ligne = $document->lignes()->create(['article_id' => $articleId, 'quantite' => $quantite, 'sens' => 1]);
+            $this->lots->ventiler($ligne, $lots[$articleId] ?? []);
         }
 
         $this->mouvements->appliquer($document, $user);

@@ -31,6 +31,8 @@ class DocumentRequest extends FormRequest
             'lignes' => ['nullable', 'array'],
             'lignes.*.article_id' => ['required', 'integer', 'exists:articles,id'],
             'lignes.*.quantite' => ['required', 'integer'],
+            'lignes.*.lot_numero' => ['nullable', 'string', 'max:50'],
+            'lignes.*.date_peremption' => ['nullable', 'date_format:Y-m-d'],
         ];
     }
 
