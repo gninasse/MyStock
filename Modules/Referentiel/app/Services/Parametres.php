@@ -53,7 +53,8 @@ class Parametres
                 default => ['nullable', 'string', 'max:'.($d['max'] ?? 255)],
             };
 
-            return [$cle => $regles];
+            // Mise à jour partielle possible : seules les clés envoyées sont validées
+            return [$cle => ['sometimes', ...$regles]];
         })->all();
     }
 

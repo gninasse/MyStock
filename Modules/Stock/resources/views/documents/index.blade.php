@@ -37,6 +37,9 @@
                     <option value="ENTREE">Entrée</option>
                     <option value="SORTIE">Sortie</option>
                     <option value="AJUSTEMENT">Ajustement</option>
+                    <option value="TRANSFERT">Transfert</option>
+                    <option value="RECEPTION">Réception de transfert</option>
+                    <option value="REINTEGRATION">Réintégration</option>
                 </select>
             </div>
             <div class="col-md-3">
@@ -53,6 +56,7 @@
                 <select class="form-select form-select-sm" id="statut" name="statut">
                     <option value="">Tous</option>
                     <option value="BROUILLON">Brouillon</option>
+                    <option value="EN_TRANSIT">En transit</option>
                     <option value="VALIDE">Validé</option>
                     <option value="ANNULE">Annulé</option>
                 </select>

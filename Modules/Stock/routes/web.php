@@ -17,10 +17,11 @@ Route::middleware(['auth'])->prefix('stock')->name('stock.')->group(function () 
         Route::put('/{id}', [DocumentController::class, 'update'])->name('update');
         Route::delete('/{id}', [DocumentController::class, 'destroy'])->name('destroy');
         Route::post('/{id}/annuler', [DocumentController::class, 'annuler'])->middleware('permission:stock.documents.annuler')->name('annuler');
+        Route::post('/{id}/annuler-transfert', [DocumentController::class, 'annulerTransfert'])->middleware('permission:stock.transferts.saisir')->name('annuler-transfert');
     });
 
-    Route::get('/{type}/nouvelle', [DocumentController::class, 'creer'])->whereIn('type', ['entrees', 'sorties'])->name('saisie.create');
-    Route::post('/{type}', [DocumentController::class, 'store'])->whereIn('type', ['entrees', 'sorties'])->name('saisie.store');
+    Route::get('/{type}/nouvelle', [DocumentController::class, 'creer'])->whereIn('type', ['entrees', 'sorties', 'transferts'])->name('saisie.create');
+    Route::post('/{type}', [DocumentController::class, 'store'])->whereIn('type', ['entrees', 'sorties', 'transferts'])->name('saisie.store');
 
     Route::prefix('inventaires')->name('inventaires.')->middleware('permission:stock.inventaires.saisir')->group(function () {
         Route::get('/', [InventaireController::class, 'index'])->name('index');
@@ -31,7 +32,7 @@ Route::middleware(['auth'])->prefix('stock')->name('stock.')->group(function () 
         Route::get('/{id}', [InventaireController::class, 'show'])->whereNumber('id')->name('show');
     });
 
-    Route::middleware('permission:stock.entrees.saisir|stock.sorties.saisir')->group(function () {
+    Route::middleware('permission:stock.entrees.saisir|stock.sorties.saisir|stock.transferts.saisir')->group(function () {
         Route::get('/magasins/{id}/articles-frequents', [SaisieController::class, 'articlesFrequents'])->name('saisie.articles-frequents');
         Route::get('/magasins/{id}/stocks', [SaisieController::class, 'stocks'])->name('saisie.stocks');
         Route::get('/beneficiaires', [SaisieController::class, 'beneficiaires'])->name('saisie.beneficiaires');

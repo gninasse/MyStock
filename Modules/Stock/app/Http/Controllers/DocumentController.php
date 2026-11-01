@@ -13,17 +13,26 @@ use Modules\Referentiel\Services\PerimetreMagasins;
 use Modules\Stock\Http\Requests\DocumentRequest;
 use Modules\Stock\Models\Document;
 use Modules\Stock\Services\MouvementService;
+use Modules\Stock\Services\TransfertService;
 
 class DocumentController extends Controller
 {
     /**
      * Segment d'URL => type de document saisissable
      */
-    protected const TYPES = ['entrees' => Document::ENTREE, 'sorties' => Document::SORTIE];
+    protected const TYPES = ['entrees' => Document::ENTREE, 'sorties' => Document::SORTIE, 'transferts' => Document::TRANSFERT];
 
-    protected const PERMISSIONS = [Document::ENTREE => 'stock.entrees.saisir', Document::SORTIE => 'stock.sorties.saisir'];
+    protected const PERMISSIONS = [
+        Document::ENTREE => 'stock.entrees.saisir',
+        Document::SORTIE => 'stock.sorties.saisir',
+        Document::TRANSFERT => 'stock.transferts.saisir',
+    ];
 
-    public function __construct(protected MouvementService $mouvements, protected PerimetreMagasins $perimetre) {}
+    public function __construct(
+        protected MouvementService $mouvements,
+        protected TransfertService $transferts,
+        protected PerimetreMagasins $perimetre,
+    ) {}
 
     public function index(Request $request)
     {
@@ -36,9 +45,11 @@ class DocumentController extends Controller
     {
         $magasins = $this->perimetre->query($request->user())->select('id');
         $query = Document::query()
-            ->with(['magasin:id,code,libelle', 'utilisateur:id,name,last_name', 'service:id,libelle', 'unite:id,libelle'])
+            ->with(['magasin:id,code,libelle', 'magasinDestination:id,libelle', 'utilisateur:id,name,last_name', 'service:id,libelle', 'unite:id,libelle'])
             ->withCount('lignes')
-            ->whereIn('magasin_id', $magasins);
+            // Un transfert est visible du magasin source et du magasin destinataire
+            ->where(fn (Builder $q) => $q->whereIn('magasin_id', $magasins)
+                ->orWhere(fn (Builder $t) => $t->where('type', Document::TRANSFERT)->whereIn('magasin_destination_id', clone $magasins)));
 
         $query->when($request->filled('date_du'), fn (Builder $q) => $q->whereDate('date_mouvement', '>=', $request->date_du))
             ->when($request->filled('date_au'), fn (Builder $q) => $q->whereDate('date_mouvement', '<=', $request->date_au))
@@ -61,12 +72,12 @@ class DocumentController extends Controller
                 'date_mouvement' => $d->date_mouvement->format('d/m/Y'),
                 'type' => $d->type,
                 'magasin' => $d->magasin->libelle,
-                'beneficiaire' => $d->beneficiaire,
+                'beneficiaire' => $d->type === Document::TRANSFERT ? '→ '.$d->magasinDestination?->libelle : $d->beneficiaire,
                 'lignes_count' => $d->lignes_count,
                 'statut' => $d->statut,
                 'utilisateur' => $d->utilisateur->full_name,
                 'modifiable' => $d->estBrouillon() && isset(self::PERMISSIONS[$d->type]) && $request->user()->can(self::PERMISSIONS[$d->type]),
-                'annulable' => $d->statut === Document::VALIDE && ! $d->document_annule_id && isset(self::PERMISSIONS[$d->type]) && $request->user()->can('stock.documents.annuler'),
+                'annulable' => $d->statut === Document::VALIDE && ! $d->document_annule_id && in_array($d->type, [Document::ENTREE, Document::SORTIE], true) && $request->user()->can('stock.documents.annuler'),
             ]);
 
         return response()->json(['total' => $total, 'rows' => $rows]);
@@ -74,12 +85,17 @@ class DocumentController extends Controller
 
     public function show(Request $request, $id)
     {
-        $document = Document::with(['lignes.article', 'magasin', 'direction', 'service', 'unite', 'utilisateur', 'validateur', 'documentAnnule', 'annulation', 'inventaire'])
+        $document = Document::with(['lignes.article', 'magasin', 'magasinDestination', 'direction', 'service', 'unite', 'utilisateur',
+            'validateur', 'recepteur', 'documentAnnule', 'annulation', 'inventaire', 'documentOrigine', 'documentsLies'])
             ->findOrFail($id);
-        $this->autoriserMagasin($request->user(), $document->magasin);
+        $user = $request->user();
+        abort_unless($this->perimetre->peutAcceder($user, $document->magasin)
+            || ($document->type === Document::TRANSFERT && $this->perimetre->peutAcceder($user, $document->magasinDestination)), 403);
 
         return view('stock::documents.show', [
             'document' => $document,
+            'peutAnnulerTransfert' => $document->type === Document::TRANSFERT && $document->statut === Document::EN_TRANSIT
+                && $user->can('stock.transferts.saisir') && $this->perimetre->peutAcceder($user, $document->magasin),
             'unitesMesure' => config('referentiel.unites_mesure'),
         ]);
     }
@@ -145,6 +161,21 @@ class DocumentController extends Controller
     }
 
     /**
+     * Annulation d'un transfert pas encore reçu : la marchandise est réintégrée à la source.
+     */
+    public function annulerTransfert(Request $request, $id)
+    {
+        $document = Document::findOrFail($id);
+        $this->autoriserDocument($request->user(), $document);
+        $reintegration = $this->transferts->annuler($document, $request->user());
+
+        return response()->json([
+            'success' => true,
+            'message' => "Transfert {$document->reference} annulé : quantités réintégrées par {$reintegration->reference}.",
+        ]);
+    }
+
+    /**
      * Enregistre le brouillon puis, si demandé, le valide. En cas d'échec de
      * la validation, rien n'est conservé : l'utilisateur corrige sa saisie.
      */
@@ -155,13 +186,21 @@ class DocumentController extends Controller
         $document = DB::transaction(function () use ($request, $type, $document, $user) {
             $document = $this->mouvements->enregistrerBrouillon($type, $request->validated(), $user, $document);
 
-            return $request->action === 'valider' ? $this->mouvements->valider($document, $user) : $document;
+            if ($request->action !== 'valider') {
+                return $document;
+            }
+
+            return $type === Document::TRANSFERT
+                ? $this->transferts->expedier($document, $user)
+                : $this->mouvements->valider($document, $user);
         });
 
-        $libelle = $type === Document::ENTREE ? 'Entrée' : 'Sortie';
-        $message = $document->estBrouillon()
-            ? 'Brouillon enregistré. Vous pouvez le retrouver dans la liste des documents.'
-            : "{$libelle} {$document->reference} validée avec succès. Stock mis à jour.";
+        $message = match (true) {
+            $document->estBrouillon() => 'Brouillon enregistré. Vous pouvez le retrouver dans la liste des documents.',
+            $document->statut === Document::EN_TRANSIT => "Transfert {$document->reference} expédié. Il est en attente de réception par {$document->magasinDestination->libelle}.",
+            $type === Document::TRANSFERT => "Transfert {$document->reference} effectué. Stock des deux magasins mis à jour.",
+            default => ($type === Document::ENTREE ? 'Entrée' : 'Sortie')." {$document->reference} validée avec succès. Stock mis à jour.",
+        };
 
         return response()->json([
             'success' => true,
@@ -184,6 +223,7 @@ class DocumentController extends Controller
             'document' => $document,
             'lignes' => $lignes,
             'magasins' => $this->perimetre->query($request->user())->where('actif', true)->orderBy('libelle')->get(),
+            'destinations' => $document->type === Document::TRANSFERT ? Magasin::where('actif', true)->orderBy('libelle')->get() : collect(),
             'categories' => Categorie::orderBy('libelle')->get(),
             'unitesMesure' => config('referentiel.unites_mesure'),
             'segment' => array_search($document->type, self::TYPES, true),

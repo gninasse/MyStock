@@ -22,6 +22,7 @@ class DocumentRequest extends FormRequest
             'action' => ['required', Rule::in(['brouillon', 'valider'])],
             'date_mouvement' => ['required', 'date_format:Y-m-d'],
             'magasin_id' => ['required', 'integer', 'exists:magasins,id'],
+            'magasin_destination_id' => ['nullable', 'integer', 'exists:magasins,id', 'different:magasin_id'],
             'direction_id' => ['nullable', 'integer', 'exists:directions,id'],
             'service_id' => ['nullable', 'integer', 'exists:services,id'],
             'unite_id' => ['nullable', 'integer', 'exists:unites,id'],
@@ -72,6 +73,7 @@ class DocumentRequest extends FormRequest
     {
         return [
             'magasin_id.required' => 'Veuillez sélectionner un magasin.',
+            'magasin_destination_id.different' => 'Le magasin destinataire doit être différent du magasin source.',
             'date_mouvement.required' => 'La date du mouvement est obligatoire.',
             'commentaire.max' => 'Le commentaire ne peut pas dépasser 500 caractères.',
         ];

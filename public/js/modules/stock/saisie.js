@@ -1,6 +1,6 @@
 /**
  * saisie.js
- * Saisie d'une entrée ou d'une sortie de stock (SFD 7.3 et 7.4).
+ * Saisie d'une entrée, d'une sortie (SFD 7.3 et 7.4) ou d'un transfert entre magasins.
  */
 import { echapper, envoyerJson, FormulaireModal } from '../referentiel/common.js';
 
@@ -9,6 +9,8 @@ $(function () {
     const doc = $page.data('document');
     const unites = $page.data('unites');
     const estSortie = doc.type === 'SORTIE';
+    // Sorties et transferts débitent le magasin source : stock disponible affiché et contrôlé
+    const debite = estSortie || doc.type === 'TRANSFERT';
     const peutCreerArticle = $page.data('peut-creer-article') === 1;
 
     // article_id => { id, code, designation, unite_mesure, quantite, stock }
@@ -19,12 +21,12 @@ $(function () {
     $page.data('lignes').forEach((l) => lignes.set(l.article_id, { ...l, id: l.article_id, stock: null }));
 
     const unite = (code) => unites[code] ?? code ?? '';
-    const avecStockSeulement = () => estSortie && $('#avec-stock').is(':checked');
+    const avecStockSeulement = () => debite && $('#avec-stock').is(':checked');
 
     // ---- Stocks disponibles (sorties) ----
     function chargerStocks(ids) {
         const magasinId = $('#magasin_id').val();
-        if (!estSortie || !magasinId || !ids.length) return $.Deferred().resolve({}).promise();
+        if (!debite || !magasinId || !ids.length) return $.Deferred().resolve({}).promise();
         return $.get(route('stock.saisie.stocks', magasinId), { article_ids: ids }).then((r) => r.data);
     }
 
@@ -55,13 +57,13 @@ $(function () {
         }
 
         $('#lignes').html([...lignes.values()].map((l) => {
-            const insuffisant = estSortie && l.stock !== null && l.quantite > l.stock;
+            const insuffisant = debite && l.stock !== null && l.quantite > l.stock;
             return `
                 <tr data-id="${l.id}" class="${insuffisant ? 'table-danger' : ''}">
                     <td>${echapper(l.designation)} <small class="text-muted">(${echapper(l.code)})</small></td>
                     <td><input type="number" class="form-control form-control-sm qte-ligne" min="1" step="1" value="${l.quantite}"></td>
                     <td>${echapper(unite(l.unite_mesure))}</td>
-                    ${estSortie ? `<td>${l.stock ?? '…'}</td>` : ''}
+                    ${debite ? `<td>${l.stock ?? '…'}</td>` : ''}
                     <td class="text-end"><button type="button" class="btn btn-sm btn-link text-danger btn-retirer" title="Retirer"><i class="fas fa-trash"></i></button></td>
                 </tr>`;
         }).join(''));
@@ -102,12 +104,12 @@ $(function () {
 
         $('#articles-frequents').html(visibles.map((a) => {
             const ligne = lignes.get(a.id);
-            const epuise = estSortie && a.stock <= 0;
+            const epuise = debite && a.stock <= 0;
             return `
                 <tr data-id="${a.id}" class="${epuise ? 'text-muted' : ''}">
                     <td style="width: 40px"><input type="checkbox" class="form-check-input chk-frequent" ${ligne ? 'checked' : ''} ${epuise ? 'disabled' : ''}></td>
                     <td>${echapper(a.designation)}</td>
-                    ${estSortie ? `<td>Stock : ${a.stock}</td>` : ''}
+                    ${debite ? `<td>Stock : ${a.stock}</td>` : ''}
                     <td style="width: 140px"><input type="number" class="form-control form-control-sm qte-frequent" min="1" step="1" value="${ligne ? ligne.quantite : ''}" ${epuise ? 'disabled' : ''}></td>
                     <td>${echapper(unite(a.unite_mesure))}</td>
                 </tr>`;
@@ -152,7 +154,7 @@ $(function () {
                 let html = visibles.map((a) => `
                     <button type="button" class="list-group-item list-group-item-action resultat" data-article="${echapper(JSON.stringify(a))}">
                         ${echapper(a.designation)} <small class="text-muted">(${echapper(a.code)})</small>
-                        ${estSortie ? `<span class="badge text-bg-light float-end">Stock : ${a.stock}</span>` : ''}
+                        ${debite ? `<span class="badge text-bg-light float-end">Stock : ${a.stock}</span>` : ''}
                     </button>`).join('');
 
                 if (!visibles.length) {
@@ -264,6 +266,7 @@ $(function () {
             commentaire: $('#commentaire').val(),
             lignes: [...lignes.values()].map((l) => ({ article_id: l.id, quantite: l.quantite }))
         };
+        if (doc.type === 'TRANSFERT') donnees.magasin_destination_id = $('#magasin_destination_id').val();
         if (estSortie) {
             Object.assign(donnees, {
                 direction_id: $('#direction_id').val(),

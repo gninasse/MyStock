@@ -7,10 +7,14 @@ import { echapper, confirmerPuisEnvoyer, notifierSucces } from '../referentiel/c
 const TYPES = {
     ENTREE: '<span class="badge text-bg-success">Entrée</span>',
     SORTIE: '<span class="badge text-bg-danger">Sortie</span>',
-    AJUSTEMENT: '<span class="badge text-bg-info">Ajustement</span>'
+    AJUSTEMENT: '<span class="badge text-bg-info">Ajustement</span>',
+    TRANSFERT: '<span class="badge text-bg-warning">Transfert</span>',
+    RECEPTION: '<span class="badge text-bg-success">Réception</span>',
+    REINTEGRATION: '<span class="badge text-bg-light border">Réintégration</span>'
 };
 const STATUTS = {
     BROUILLON: '<span class="badge text-bg-secondary">Brouillon</span>',
+    EN_TRANSIT: '<span class="badge text-bg-warning">En transit</span>',
     VALIDE: '<span class="badge text-bg-primary">Validé</span>',
     ANNULE: '<span class="badge text-bg-dark">Annulé</span>'
 };

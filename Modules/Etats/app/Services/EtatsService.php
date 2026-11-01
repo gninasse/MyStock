@@ -12,13 +12,14 @@ use Modules\Referentiel\Models\Article;
 use Modules\Referentiel\Models\Categorie;
 use Modules\Referentiel\Models\Magasin;
 use Modules\Referentiel\Services\PerimetreMagasins;
+use Modules\Stock\Models\Document;
 
 /**
  * Les quatre états de la SFD 9, toujours restreints aux magasins visibles par l'utilisateur.
  */
 class EtatsService
 {
-    public const TYPES = ['ENTREE' => 'Entrée', 'SORTIE' => 'Sortie', 'AJUSTEMENT' => 'Ajustement'];
+    public const TYPES = Document::LIBELLES;
 
     public function __construct(protected PerimetreMagasins $perimetre) {}
 

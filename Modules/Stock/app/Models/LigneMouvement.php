@@ -10,11 +10,11 @@ class LigneMouvement extends Model
 {
     protected $table = 'lignes_mouvement';
 
-    protected $fillable = ['document_id', 'article_id', 'quantite', 'sens'];
+    protected $fillable = ['document_id', 'article_id', 'quantite', 'quantite_recue', 'sens'];
 
     protected function casts(): array
     {
-        return ['quantite' => 'integer', 'sens' => 'integer'];
+        return ['quantite' => 'integer', 'quantite_recue' => 'integer', 'sens' => 'integer'];
     }
 
     public function document(): BelongsTo

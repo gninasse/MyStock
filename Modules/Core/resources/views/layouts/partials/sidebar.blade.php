@@ -108,7 +108,7 @@
                 </ul>
               </li>
               @endcanany
-              @canany(['stock.entrees.saisir', 'stock.sorties.saisir', 'stock.documents.index'])
+              @canany(['stock.entrees.saisir', 'stock.sorties.saisir', 'stock.transferts.saisir', 'stock.documents.index'])
               <li class="nav-item {{ request()->routeIs('stock.saisie.*', 'stock.documents.*') ? 'menu-open' : '' }}">
                 <a href="#" class="nav-link {{ request()->routeIs('stock.saisie.*', 'stock.documents.*') ? 'active' : '' }}">
                   <i class="nav-icon bi bi-arrow-left-right"></i>
@@ -134,6 +134,14 @@
                     <a href="{{ route('stock.saisie.create', 'sorties') }}" class="nav-link {{ request()->is('stock/sorties/*') ? 'active' : '' }}">
                       <i class="nav-icon bi bi-box-arrow-up"></i>
                       <p>Nouvelle sortie</p>
+                    </a>
+                  </li>
+                  @endcan
+                  @can('stock.transferts.saisir')
+                  <li class="nav-item">
+                    <a href="{{ route('stock.saisie.create', 'transferts') }}" class="nav-link {{ request()->is('stock/transferts/*') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-truck"></i>
+                      <p>Nouveau transfert</p>
                     </a>
                   </li>
                   @endcan

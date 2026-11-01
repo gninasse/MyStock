@@ -1,15 +1,20 @@
 @extends('core::layouts.master')
 
 @php
+    $estTransfert = $document->type === \Modules\Stock\Models\Document::TRANSFERT;
     $estSortie = $document->type === \Modules\Stock\Models\Document::SORTIE;
-    $titre = $estSortie ? 'Sortie de stock' : 'Entrée de stock';
+    // Sorties et transferts débitent le magasin : on affiche le stock disponible
+    $debite = $estSortie || $estTransfert;
+    $titre = $estTransfert ? 'Transfert entre magasins' : ($estSortie ? 'Sortie de stock' : 'Entrée de stock');
+    $nouveau = $estTransfert ? 'Nouveau transfert' : 'Nouvelle '.($estSortie ? 'sortie' : 'entrée');
+    $boutonValider = $estTransfert ? 'Expédier le transfert' : 'Valider '.($estSortie ? 'la sortie' : 'l\'entrée');
 @endphp
 
 @section('header', $titre)
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('stock.documents.index') }}">Documents</a></li>
-    <li class="breadcrumb-item active" aria-current="page">{{ $document->exists ? 'Modifier le brouillon' : 'Nouvelle '.($estSortie ? 'sortie' : 'entrée') }}</li>
+    <li class="breadcrumb-item active" aria-current="page">{{ $document->exists ? 'Modifier le brouillon' : $nouveau }}</li>
 @endsection
 
 @section('content')
@@ -19,13 +24,14 @@
          'type' => $document->type,
          'segment' => $segment,
          'magasin_id' => $document->magasin_id,
+         'magasin_destination_id' => $document->magasin_destination_id,
          'direction_id' => $document->direction_id,
          'service_id' => $document->service_id,
          'unite_id' => $document->unite_id,
      ]) }}"
      data-lignes="{{ json_encode($lignes) }}"
      data-unites="{{ json_encode($unitesMesure) }}"
-     data-peut-creer-article="{{ ! $estSortie && auth()->user()->can('referentiel.articles.store') ? 1 : 0 }}">
+     data-peut-creer-article="{{ ! $debite && auth()->user()->can('referentiel.articles.store') ? 1 : 0 }}">
 
     <div class="alert alert-danger d-none" id="erreurs"></div>
 
@@ -44,7 +50,7 @@
                            min="{{ now()->subDays(\Modules\Referentiel\Services\Parametres::get('mouvement_jours_retroactifs'))->toDateString() }}" required>
                 </div>
                 <div class="col-md-5">
-                    <label for="magasin_id" class="form-label">Magasin {{ $estSortie ? 'source' : 'destinataire' }} <span class="text-danger">*</span></label>
+                    <label for="magasin_id" class="form-label">Magasin {{ $debite ? 'source' : 'destinataire' }} <span class="text-danger">*</span></label>
                     <select class="form-select" id="magasin_id" name="magasin_id" required>
                         <option value="">— Choisir un magasin —</option>
                         @foreach ($magasins as $magasin)
@@ -52,6 +58,17 @@
                         @endforeach
                     </select>
                 </div>
+                @if ($estTransfert)
+                <div class="col-md-4">
+                    <label for="magasin_destination_id" class="form-label">Magasin destinataire <span class="text-danger">*</span></label>
+                    <select class="form-select" id="magasin_destination_id" name="magasin_destination_id" required>
+                        <option value="">— Choisir un magasin —</option>
+                        @foreach ($destinations as $magasin)
+                            <option value="{{ $magasin->id }}" @selected($magasin->id === $document->magasin_destination_id)>{{ $magasin->libelle }} ({{ $magasin->code }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
             </div>
         </div>
 
@@ -79,7 +96,7 @@
         <div class="card mb-3 d-none" id="zone-articles">
             <div class="card-header d-flex align-items-center">
                 <h3 class="card-title mb-0"><i class="fas fa-star text-warning"></i> Articles fréquents</h3>
-                @if ($estSortie)
+                @if ($debite)
                 <div class="form-check ms-auto">
                     <input class="form-check-input" type="checkbox" id="avec-stock" checked>
                     <label class="form-check-label" for="avec-stock">Afficher uniquement les articles avec stock disponible</label>
@@ -119,7 +136,7 @@
                             <th>Article</th>
                             <th style="width: 140px">Quantité</th>
                             <th>Unité</th>
-                            @if ($estSortie)<th>Stock dispo.</th>@endif
+                            @if ($debite)<th>Stock dispo.</th>@endif
                             <th class="text-end"></th>
                         </tr>
                     </thead>
@@ -133,18 +150,18 @@
                 <label for="commentaire" class="form-label">Commentaire</label>
                 <input type="text" class="form-control" id="commentaire" name="commentaire" maxlength="500"
                        value="{{ $document->commentaire }}"
-                       placeholder="{{ $estSortie ? 'Ex. : Dotation trimestrielle service informatique' : 'Ex. : Livraison fournisseur BuroPlus - BC 458' }}">
+                       placeholder="{{ $estTransfert ? 'Ex. : Réassort du magasin annexe' : ($estSortie ? 'Ex. : Dotation trimestrielle service informatique' : 'Ex. : Livraison fournisseur BuroPlus - BC 458') }}">
             </div>
             <div class="card-footer text-end">
                 <a href="{{ route('stock.documents.index') }}" class="btn btn-secondary">Annuler</a>
                 <button type="button" class="btn btn-outline-primary" data-action="brouillon"><i class="fas fa-save"></i> Enregistrer brouillon</button>
-                <button type="button" class="btn btn-success" data-action="valider"><i class="fas fa-check"></i> Valider {{ $estSortie ? 'la sortie' : 'l\'entrée' }}</button>
+                <button type="button" class="btn btn-success" data-action="valider"><i class="fas {{ $estTransfert ? 'fa-truck' : 'fa-check' }}"></i> {{ $boutonValider }}</button>
             </div>
         </div>
     </form>
 </div>
 
-@unless ($estSortie)
+@unless ($debite)
 <div class="modal fade" id="articleRapideModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form id="articleRapideForm" novalidate>

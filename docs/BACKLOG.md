@@ -11,15 +11,14 @@ Une tâche par itération de la boucle de développement : implémenter, tester
       nom de l'organisation (en-têtes PDF), ancienneté max d'un mouvement (remplace
       `stock.jours_retroactifs_max`). Chaque tâche suivante ajoute ses propres paramètres.
       Messages de validation en français (`lang/fr`, `APP_LOCALE=fr`).
-- [ ] 2. **Transferts entre magasins** : document TRANSFERT (TRF-…) magasin source →
-      destination. Mode paramétrable :
-      - `DEUX_ETAPES` : l'expédition débite la source, la marchandise est « en transit »,
-        le magasin destination réceptionne ;
-      - `UNE_ETAPE` : expédition et réception dans la même opération ;
-      - `UNE_ETAPE_SI_ACCES` : une étape si l'expéditeur a aussi accès au magasin
-        destination, sinon deux étapes.
-      Permission `stock.transferts.saisir`. Annulation avant réception = restitution
-      intégrale à la source (cas 4 OpenClinic).
+- [x] 2. **Transferts entre magasins** : document TRANSFERT (TRF-…) magasin source →
+      destination, statut « En transit » entre expédition et réception. Mode paramétrable
+      (`transfert_mode`) : `DEUX_ETAPES`, `UNE_ETAPE`, `UNE_ETAPE_SI_ACCES` (une étape si
+      l'expéditeur a la permission de réception et accès au magasin destinataire).
+      Réception = document RECEPTION (REC-…) ; quantité non reçue réintégrée (REINTEGRATION,
+      RIN-…) ou comptée en perte (`transfert_ecart`). Annulation avant réception =
+      réintégration intégrale. Permissions `stock.transferts.saisir` / `.receptionner`.
+      ⚠ Vérification navigateur à refaire (extension Chrome déconnectée pendant l'itération).
 - [ ] 3. **Réception des transferts** : écran « À réceptionner » (badge menu),
       saisie de la quantité reçue par ligne, motif obligatoire si écart.
       Écart traité selon le paramètre : `RETOUR_SOURCE` (recrédité à la source, cas 2)

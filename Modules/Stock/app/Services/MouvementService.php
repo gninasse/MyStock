@@ -30,6 +30,7 @@ class MouvementService
                 'date_mouvement' => $donnees['date_mouvement'],
                 'magasin_id' => $donnees['magasin_id'],
                 'commentaire' => $donnees['commentaire'] ?? null,
+                'magasin_destination_id' => $type === Document::TRANSFERT ? ($donnees['magasin_destination_id'] ?? null) : null,
                 'direction_id' => $type === Document::SORTIE ? ($donnees['direction_id'] ?? null) : null,
                 'service_id' => $type === Document::SORTIE ? ($donnees['service_id'] ?? null) : null,
                 'unite_id' => $type === Document::SORTIE ? ($donnees['unite_id'] ?? null) : null,
@@ -81,6 +82,10 @@ class MouvementService
 
             if (! $document->estBrouillon()) {
                 throw ValidationException::withMessages(['document' => 'Ce document a déjà été validé.']);
+            }
+
+            if ($document->type === Document::TRANSFERT) {
+                throw ValidationException::withMessages(['document' => 'Un transfert s\'expédie, il ne se valide pas directement.']);
             }
 
             $this->controler($document);
@@ -173,9 +178,9 @@ class MouvementService
         return collect($articleIds)->mapWithKeys(fn ($id) => [$id => (int) ($stocks[$id] ?? 0)])->all();
     }
 
-    protected function controler(Document $document): void
+    public function controler(Document $document): void
     {
-        $document->load('magasin', 'lignes.article');
+        $document->load('magasin', 'magasinDestination', 'lignes.article');
         $erreurs = [];
 
         if ($document->lignes->where('quantite', '>', 0)->isEmpty()) {
@@ -192,6 +197,16 @@ class MouvementService
 
         if ($document->type === Document::SORTIE && (! $document->direction_id || ! $document->service_id)) {
             $erreurs['service_id'][] = 'Veuillez sélectionner une Direction et un Service.';
+        }
+
+        if ($document->type === Document::TRANSFERT) {
+            if (! $document->magasinDestination) {
+                $erreurs['magasin_destination_id'][] = 'Veuillez sélectionner le magasin destinataire.';
+            } elseif ($document->magasin_destination_id === $document->magasin_id) {
+                $erreurs['magasin_destination_id'][] = 'Le magasin destinataire doit être différent du magasin source.';
+            } elseif (! $document->magasinDestination->actif) {
+                $erreurs['magasin_destination_id'][] = 'Le magasin destinataire est désactivé.';
+            }
         }
 
         foreach ($document->lignes as $ligne) {
@@ -223,9 +238,10 @@ class MouvementService
     }
 
     /**
-     * Attribue la référence, met à jour le stock et passe le document à VALIDE.
+     * Attribue la référence, met à jour le stock et passe le document au statut donné
+     * (VALIDE, ou EN_TRANSIT pour un transfert expédié).
      */
-    protected function appliquer(Document $document, User $user): void
+    public function appliquer(Document $document, User $user, string $statut = Document::VALIDE): void
     {
         $lignes = $document->lignes()->with('article')->get()->sortBy('article_id');
         $insuffisants = [];
@@ -249,7 +265,7 @@ class MouvementService
 
         $document->update([
             'reference' => $this->genererReference($document),
-            'statut' => Document::VALIDE,
+            'statut' => $statut,
             'validated_at' => now(),
             'valide_par' => $user->id,
         ]);
@@ -284,7 +300,7 @@ class MouvementService
         return sprintf('%s-%s-%03d', $prefixe, $document->date_mouvement->format('Ymd'), $numero);
     }
 
-    protected function journaliser(Document $document, string $evenement, User $user, array $proprietes = []): void
+    public function journaliser(Document $document, string $evenement, User $user, array $proprietes = []): void
     {
         activity('stock')
             ->performedOn($document)
