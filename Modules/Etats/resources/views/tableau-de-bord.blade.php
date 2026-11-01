@@ -8,7 +8,10 @@
 
 @section('content')
 @php
-    $types = ['ENTREE' => ['Entrée', 'success'], 'SORTIE' => ['Sortie', 'danger'], 'AJUSTEMENT' => ['Ajustement', 'info']];
+    $types = [
+        'ENTREE' => ['Entrée', 'success'], 'SORTIE' => ['Sortie', 'danger'], 'AJUSTEMENT' => ['Ajustement', 'info'],
+        'TRANSFERT' => ['Transfert', 'warning'], 'RECEPTION' => ['Réception', 'success'], 'REINTEGRATION' => ['Réintégration', 'secondary'],
+    ];
 @endphp
 
 {{-- Raccourcis selon le rôle --}}
@@ -18,6 +21,9 @@
     @endcan
     @can('stock.sorties.saisir')
         <a href="{{ route('stock.saisie.create', 'sorties') }}" class="btn btn-danger"><i class="fas fa-arrow-up"></i> Nouvelle sortie</a>
+    @endcan
+    @can('stock.transferts.saisir')
+        <a href="{{ route('stock.saisie.create', 'transferts') }}" class="btn btn-warning"><i class="fas fa-truck"></i> Nouveau transfert</a>
     @endcan
     @can('stock.inventaires.saisir')
         <a href="{{ route('stock.inventaires.create') }}" class="btn btn-primary"><i class="fas fa-clipboard-check"></i> Saisir un inventaire</a>
@@ -101,6 +107,41 @@
                             </tr>
                         @empty
                             <tr><td colspan="5" class="text-center text-muted">Aucun mouvement validé</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if ($transfertsEnTransit !== null)
+    <div class="col-lg-6">
+        <div class="card mb-3">
+            <div class="card-header d-flex align-items-center">
+                <h3 class="card-title mb-0">🚚 Transferts en transit</h3>
+                @can('etats.transferts')
+                    <a href="{{ route('etats.transferts') }}" class="ms-auto small">État des transferts</a>
+                @endcan
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Transfert</th><th>Depuis</th><th>Vers</th><th>Expédié</th><th></th></tr></thead>
+                    <tbody>
+                        @forelse ($transfertsEnTransit as $transfert)
+                            <tr>
+                                <td><a href="{{ route('stock.documents.show', $transfert->id) }}">{{ $transfert->reference }}</a></td>
+                                <td>{{ $transfert->magasin->libelle }}</td>
+                                <td>{{ $transfert->magasinDestination->libelle }}</td>
+                                <td title="{{ $transfert->validated_at->format('d/m/Y H:i') }}">{{ $transfert->validated_at->diffForHumans() }}</td>
+                                <td class="text-end">
+                                    @if (in_array($transfert->magasin_destination_id, $magasinsVisibles) && auth()->user()->can('stock.transferts.receptionner'))
+                                        <a href="{{ route('stock.transferts.reception', $transfert->id) }}" class="btn btn-success btn-sm py-0">Réceptionner</a>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="text-center text-muted">Aucun transfert en transit</td></tr>
                         @endforelse
                     </tbody>
                 </table>

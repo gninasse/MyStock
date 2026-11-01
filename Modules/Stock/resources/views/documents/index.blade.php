@@ -18,6 +18,9 @@
             @can('stock.sorties.saisir')
             <a href="{{ route('stock.saisie.create', 'sorties') }}" class="btn btn-danger btn-sm"><i class="fas fa-arrow-up"></i> Nouvelle sortie</a>
             @endcan
+            @can('stock.transferts.saisir')
+            <a href="{{ route('stock.saisie.create', 'transferts') }}" class="btn btn-warning btn-sm"><i class="fas fa-truck"></i> Nouveau transfert</a>
+            @endcan
         </div>
     </div>
     <div class="card-body">

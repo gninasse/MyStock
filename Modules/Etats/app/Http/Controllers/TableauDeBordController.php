@@ -35,6 +35,14 @@ class TableauDeBordController extends Controller
                     ->whereIn('magasin_id', $magasins)->whereNotNull('validated_at')
                     ->latest('validated_at')->limit(10)->get()
                 : null,
+            // Transferts en transit au départ ou à destination des magasins de l'utilisateur
+            'transfertsEnTransit' => $user->canAny(['stock.transferts.saisir', 'stock.transferts.receptionner'])
+                ? Document::with('magasin:id,libelle', 'magasinDestination:id,libelle')
+                    ->where('type', Document::TRANSFERT)->where('statut', Document::EN_TRANSIT)
+                    ->where(fn ($q) => $q->whereIn('magasin_id', $magasins)->orWhereIn('magasin_destination_id', clone $magasins))
+                    ->oldest('validated_at')->limit(10)->get()
+                : null,
+            'magasinsVisibles' => $perimetre->query($user)->pluck('id')->all(),
             'dernieresActions' => $user->can('cores.activities.index')
                 ? Activity::with('causer')->latest()->limit(5)->get()
                 : null,

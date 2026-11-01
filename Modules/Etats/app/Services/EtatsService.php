@@ -135,7 +135,9 @@ class EtatsService
                 ->orWhereRaw('LOWER(a.designation) LIKE ?', ['%'.mb_strtolower($texte).'%'])))
             ->when($f['beneficiaire'] ?? null, fn ($q, $texte) => $q->where(fn ($w) => $w
                 ->whereRaw('LOWER(un.libelle) LIKE ?', ['%'.mb_strtolower($texte).'%'])
-                ->orWhereRaw('LOWER(se.libelle) LIKE ?', ['%'.mb_strtolower($texte).'%'])));
+                ->orWhereRaw('LOWER(se.libelle) LIKE ?', ['%'.mb_strtolower($texte).'%'])
+                ->orWhereRaw('LOWER(md.libelle) LIKE ?', ['%'.mb_strtolower($texte).'%'])
+                ->orWhereRaw('LOWER(mo.libelle) LIKE ?', ['%'.mb_strtolower($texte).'%'])));
 
         $lignes = $requete
             ->orderBy('d.date_mouvement')->orderBy('d.validated_at')->orderBy('d.reference')
@@ -148,7 +150,7 @@ class EtatsService
                 'magasin' => $r->magasin,
                 'article' => "{$r->designation} ({$r->code})",
                 'quantite' => $r->sens * $r->quantite,
-                'beneficiaire' => $r->unite ?? $r->service ?? '',
+                'beneficiaire' => $this->beneficiaire($r),
                 'commentaire' => $r->commentaire,
                 'utilisateur' => trim("{$r->prenom} {$r->nom}"),
             ]);
@@ -205,7 +207,7 @@ class EtatsService
                     'type' => self::TYPES[$r->type],
                     'reference' => $r->reference,
                     'quantite' => $quantite,
-                    'beneficiaire' => $r->unite ?? $r->service ?? '',
+                    'beneficiaire' => $this->beneficiaire($r),
                     'cumul' => $cumul,
                 ];
             });
@@ -228,6 +230,79 @@ class EtatsService
     }
 
     /**
+     * Bénéficiaire d'une sortie, ou contrepartie d'un mouvement de transfert.
+     */
+    protected function beneficiaire(object $r): string
+    {
+        return match ($r->type) {
+            Document::TRANSFERT => "→ {$r->destination}",
+            Document::RECEPTION => "← {$r->provenance}",
+            Document::REINTEGRATION => "↩ {$r->origine}",
+            default => $r->unite ?? $r->service ?? '',
+        };
+    }
+
+    /**
+     * Transferts expédiés : filtres date_du, date_au, statut (EN_TRANSIT, VALIDE, ANNULE ou vide), magasin_id.
+     * Un transfert est visible si l'utilisateur voit son magasin source ou destinataire.
+     */
+    public function transferts(array $f, User $user): Etat
+    {
+        $du = $f['date_du'] ?? now()->subMonths(3)->toDateString();
+        $au = $f['date_au'] ?? now()->toDateString();
+        $statut = $f['statut'] ?? Document::EN_TRANSIT;
+        $visibles = $this->perimetre->query($user)->select('id');
+        $statuts = [Document::EN_TRANSIT => 'En transit', Document::VALIDE => 'Reçu', Document::ANNULE => 'Annulé'];
+
+        $lignes = DB::table('lignes_mouvement as l')
+            ->join('documents as d', 'd.id', '=', 'l.document_id')
+            ->join('articles as a', 'a.id', '=', 'l.article_id')
+            ->join('magasins as ms', 'ms.id', '=', 'd.magasin_id')
+            ->join('magasins as md', 'md.id', '=', 'd.magasin_destination_id')
+            ->where('d.type', Document::TRANSFERT)
+            ->whereNotNull('d.validated_at')
+            ->where(fn ($q) => $q->whereIn('d.magasin_id', $visibles)->orWhereIn('d.magasin_destination_id', clone $visibles))
+            ->whereDate('d.date_mouvement', '>=', $du)->whereDate('d.date_mouvement', '<=', $au)
+            ->when($statut, fn ($q) => $q->where('d.statut', $statut))
+            ->when($f['magasin_id'] ?? null, fn ($q, $id) => $q->where(fn ($w) => $w->where('d.magasin_id', $id)->orWhere('d.magasin_destination_id', $id)))
+            ->orderBy('d.validated_at')->orderBy('d.reference')->orderBy('a.designation')
+            ->limit(config('etats.lignes_max'))
+            ->get(['d.reference', 'd.validated_at', 'd.statut', 'd.motif_ecart', 'ms.libelle as source', 'md.libelle as destination',
+                'a.code', 'a.designation', 'l.quantite', 'l.quantite_recue'])
+            ->map(fn ($r) => [
+                'reference' => $r->reference,
+                'expedie_le' => Carbon::parse($r->validated_at)->format('d/m/Y'),
+                'source' => $r->source,
+                'destination' => $r->destination,
+                'article' => "{$r->designation} ({$r->code})",
+                'expedie' => (int) $r->quantite,
+                'recu' => $r->quantite_recue,
+                'ecart' => $r->quantite_recue === null ? null : (int) $r->quantite_recue - (int) $r->quantite,
+                'statut' => $statuts[$r->statut] ?? $r->statut,
+                'motif' => $r->motif_ecart,
+                // Orange : en transit ; rouge : reçu avec un écart
+                '_classe' => match (true) {
+                    $r->statut === Document::EN_TRANSIT => 'alerte-egal',
+                    $r->quantite_recue !== null && $r->quantite_recue < $r->quantite => 'alerte-sous',
+                    default => null,
+                },
+            ]);
+
+        return new Etat(
+            titre: 'Transferts entre magasins',
+            filtres: [
+                'Période d\'expédition' => Carbon::parse($du)->format('d/m/Y').' → '.Carbon::parse($au)->format('d/m/Y'),
+                'Statut' => $statuts[$statut] ?? 'Tous',
+                'Magasin' => isset($f['magasin_id']) ? Magasin::find($f['magasin_id'])?->libelle : 'Tous',
+            ],
+            colonnes: ['reference' => 'N° transfert', 'expedie_le' => 'Expédié le', 'source' => 'Depuis', 'destination' => 'Vers', 'article' => 'Article',
+                'expedie' => 'Expédié', 'recu' => 'Reçu', 'ecart' => 'Écart', 'statut' => 'Statut', 'motif' => 'Motif de l\'écart'],
+            numeriques: ['expedie', 'recu', 'ecart'],
+            groupes: [['titre' => null, 'lignes' => $lignes->all(), 'total' => null]],
+        );
+    }
+
+    /**
      * Lignes des documents validés (y compris ceux annulés depuis, compensés par leur inverse).
      */
     protected function lignesValidees(User $user): Builder
@@ -239,12 +314,16 @@ class EtatsService
             ->join('users as u', 'u.id', '=', 'd.user_id')
             ->leftJoin('services as se', 'se.id', '=', 'd.service_id')
             ->leftJoin('unites as un', 'un.id', '=', 'd.unite_id')
+            ->leftJoin('magasins as md', 'md.id', '=', 'd.magasin_destination_id')
+            ->leftJoin('documents as o', 'o.id', '=', 'd.document_origine_id')
+            ->leftJoin('magasins as mo', 'mo.id', '=', 'o.magasin_id')
             ->whereNotNull('d.validated_at')
             ->whereIn('d.magasin_id', $this->perimetre->query($user)->select('id'))
             ->select([
                 'd.reference', 'd.date_mouvement', 'd.type', 'd.commentaire', 'm.libelle as magasin',
                 'a.code', 'a.designation', 'l.quantite', 'l.sens', 'se.libelle as service', 'un.libelle as unite',
                 'u.name as prenom', 'u.last_name as nom',
+                'md.libelle as destination', 'mo.libelle as provenance', 'o.reference as origine',
             ]);
     }
 

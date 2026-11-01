@@ -26,8 +26,10 @@ Une tâche par itération de la boucle de développement : implémenter, tester
 - [x] 4. **Retours** : bouton « Retourner au magasin source » sur un transfert reçu,
       formulaire de transfert inverse pré-rempli (lié par `document_origine_id`),
       quantités limitées au reçu moins les retours déjà expédiés (contrôle à l'expédition).
-- [ ] 5. **États et tableau de bord** : état « Transferts en transit », transferts dans
-      le journal et la fiche de stock (provenance / destination), widget du tableau de bord.
+- [x] 5. **États et tableau de bord** : état « Transferts » (en transit / reçus / annulés,
+      écarts en rouge, export Excel/PDF, permission `etats.transferts`), provenance et
+      destination dans le journal et la fiche de stock, bloc « Transferts en transit » et
+      raccourci « Nouveau transfert » au tableau de bord.
 - [ ] 6. **Lots et péremption (données)** : lots par article (numéro, date de péremption),
       stock par lot, saisie du lot sur les entrées quand la gestion des lots est active.
 - [ ] 7. **Lots et péremption (sorties, transferts, alertes)** : proposition FEFO à la sortie

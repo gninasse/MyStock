@@ -310,4 +310,29 @@ class TransfertTest extends TestCase
         // L'expéditeur n'a pas accès au magasin destinataire : pas de retour
         $this->actingAs($this->expediteur)->get(route('stock.documents.retour', $origine->id))->assertForbidden();
     }
+
+    public function test_etats_et_tableau_de_bord(): void
+    {
+        $this->expedier($this->expediteur);
+        $transfert = $this->transfert();
+
+        // En transit : visible des deux côtés
+        $this->actingAs($this->recepteur)->get(route('etats.transferts'))
+            ->assertOk()->assertSee($transfert->reference)->assertSee('En transit');
+        $this->get(route('etats.tableau-de-bord'))->assertOk()->assertSee('Transferts en transit')->assertSee($transfert->reference);
+
+        app(TransfertService::class)->receptionner($transfert, [$this->papier->id => 15], 'Casse', $this->recepteur);
+
+        // Reçu avec écart : absent du filtre par défaut, présent avec « Tous »
+        $this->get(route('etats.transferts'))->assertDontSee($transfert->reference);
+        $this->get(route('etats.transferts', ['envoye' => 1, 'statut' => '']))->assertSee($transfert->reference)->assertSee('Casse');
+
+        // Fiche de stock du destinataire : réception en provenance de A
+        $this->get(route('etats.fiche-stock', ['article_id' => $this->papier->id, 'magasin_id' => $this->destination->id, 'date_du' => '2026-05-01']))
+            ->assertOk()->assertSee('Réception de transfert')->assertSee('← Magasin A');
+
+        // Journal de l'expéditeur : transfert vers B et réintégration de l'écart
+        $this->actingAs($this->expediteur)->get(route('etats.journal'))
+            ->assertOk()->assertSee('→ Magasin B')->assertSee('Réintégration')->assertSee('↩ '.$transfert->reference);
+    }
 }

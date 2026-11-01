@@ -194,9 +194,9 @@
                 </ul>
               </li>
               @endcan
-              @canany(['etats.stock-magasin', 'etats.stock-categorie', 'etats.journal', 'etats.fiche-stock'])
-              <li class="nav-item {{ request()->routeIs('etats.stock-*', 'etats.journal', 'etats.fiche-stock') ? 'menu-open' : '' }}">
-                <a href="#" class="nav-link {{ request()->routeIs('etats.stock-*', 'etats.journal', 'etats.fiche-stock') ? 'active' : '' }}">
+              @canany(['etats.stock-magasin', 'etats.stock-categorie', 'etats.journal', 'etats.fiche-stock', 'etats.transferts'])
+              <li class="nav-item {{ request()->routeIs('etats.stock-*', 'etats.journal', 'etats.fiche-stock', 'etats.transferts') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ request()->routeIs('etats.stock-*', 'etats.journal', 'etats.fiche-stock', 'etats.transferts') ? 'active' : '' }}">
                   <i class="nav-icon bi bi-bar-chart"></i>
                   <p>
                     États
@@ -233,6 +233,14 @@
                     <a href="{{ route('etats.fiche-stock') }}" class="nav-link {{ request()->routeIs('etats.fiche-stock') ? 'active' : '' }}">
                       <i class="nav-icon bi bi-file-earmark-text"></i>
                       <p>Fiche de stock</p>
+                    </a>
+                  </li>
+                  @endcan
+                  @can('etats.transferts')
+                  <li class="nav-item">
+                    <a href="{{ route('etats.transferts') }}" class="nav-link {{ request()->routeIs('etats.transferts') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-truck"></i>
+                      <p>Transferts</p>
                     </a>
                   </li>
                   @endcan

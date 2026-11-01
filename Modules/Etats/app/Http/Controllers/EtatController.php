@@ -79,6 +79,23 @@ class EtatController extends Controller
         ]);
     }
 
+    public function transferts(Request $request)
+    {
+        $filtres = $request->validate([
+            'date_du' => ['nullable', 'date_format:Y-m-d'],
+            'date_au' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:date_du'],
+            'statut' => ['nullable', 'in:EN_TRANSIT,VALIDE,ANNULE'],
+            'magasin_id' => ['nullable', 'integer'],
+        ], ['date_au.after_or_equal' => 'La date de fin doit suivre la date de début.']);
+
+        // « Tous les statuts » envoie un statut vide : à distinguer du premier affichage (en transit)
+        if ($request->has('envoye') && ! $request->filled('statut')) {
+            $filtres['statut'] = '';
+        }
+
+        return $this->rendre($request, 'transferts', $this->etats->transferts($filtres, $request->user()), $filtres);
+    }
+
     /**
      * Impression navigateur : seule la journalisation passe par le serveur (SFD 9.5).
      */
