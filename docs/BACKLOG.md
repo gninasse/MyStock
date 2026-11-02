@@ -61,7 +61,7 @@ Une tâche par itération de la boucle de développement : implémenter, tester
 - [x] 10. **Imprimés des documents** : bon d'entrée, de sortie, de transfert (signatures
       expéditeur / transporteur / réceptionnaire), de réception, de réintégration,
       d'ajustement ; filigrane BROUILLON / ANNULÉ ; impression journalisée.
-- [ ] 11. **Imprimés d'inventaire** : fiche de comptage vierge (par magasin, catégorie)
+- [x] 11. **Imprimés d'inventaire** : fiche de comptage vierge (par magasin, catégorie)
       et procès-verbal d'inventaire (écarts, signatures).
 - [ ] 12. **Nouveaux états** : consommation par service, couverture de stock et risque
       de rupture, articles dormants, écarts d'inventaire (exports Excel / PDF).

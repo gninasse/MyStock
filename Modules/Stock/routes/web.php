@@ -38,7 +38,9 @@ Route::middleware(['auth'])->prefix('stock')->name('stock.')->group(function () 
         Route::get('/nouveau', [InventaireController::class, 'create'])->name('create');
         Route::get('/magasins/{id}/articles', [InventaireController::class, 'articles'])->name('articles');
         Route::post('/', [InventaireController::class, 'store'])->name('store');
+        Route::get('/fiche-de-comptage', [InventaireController::class, 'ficheComptage'])->name('fiche-comptage');
         Route::get('/{id}', [InventaireController::class, 'show'])->whereNumber('id')->name('show');
+        Route::get('/{id}/imprimer', [InventaireController::class, 'imprimer'])->whereNumber('id')->name('imprimer');
     });
 
     Route::middleware('permission:stock.entrees.saisir|stock.sorties.saisir|stock.transferts.saisir')->group(function () {

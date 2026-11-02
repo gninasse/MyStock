@@ -116,4 +116,36 @@ class ImpressionTest extends TestCase
             ->assertSee('data-apercu-pdf="'.route('stock.documents.imprimer', $document->id).'"', false)
             ->assertSee('id="modalApercuPdf"', false);
     }
+
+    public function test_fiche_de_comptage_a_l_aveugle_par_defaut(): void
+    {
+        $user = $this->gestionnaire($this->magasin);
+        $this->entreeValidee($user);
+
+        $reponse = $this->actingAs($user)->get(route('stock.inventaires.fiche-comptage', ['magasin_id' => $this->magasin->id]));
+
+        $reponse->assertOk()->assertHeader('content-type', 'application/pdf');
+        $this->assertTrue(Activity::where('description', 'fiche_comptage_imprimee')->exists());
+        $this->actingAs($this->gestionnaire($this->autre))
+            ->get(route('stock.inventaires.fiche-comptage', ['magasin_id' => $this->magasin->id]))
+            ->assertForbidden();
+    }
+
+    public function test_proces_verbal_d_inventaire(): void
+    {
+        $user = $this->gestionnaire($this->magasin);
+        $this->entreeValidee($user);
+        $id = $this->actingAs($user)->postJson(route('stock.inventaires.store'), [
+            'magasin_id' => $this->magasin->id, 'date_inventaire' => '2026-05-22', 'commentaire' => 'Casse',
+            'comptages' => [['article_id' => $this->papier->id, 'quantite_reelle' => 10]],
+        ])->assertOk()->json('data.id');
+
+        $this->actingAs($user)->get(route('stock.inventaires.imprimer', $id))
+            ->assertOk()->assertHeader('content-type', 'application/pdf');
+        $this->actingAs($user)->get(route('stock.inventaires.show', $id))
+            ->assertSee('data-apercu-pdf="'.route('stock.inventaires.imprimer', $id).'"', false);
+        $this->actingAs($this->gestionnaire($this->autre))
+            ->get(route('stock.inventaires.imprimer', $id))
+            ->assertForbidden();
+    }
 }

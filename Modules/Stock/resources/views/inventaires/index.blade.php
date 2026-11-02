@@ -42,6 +42,8 @@
 @push('js')
 <script>
     window.ajustementFormatter = (value) => value ?? '<span class="text-muted">Aucun écart</span>';
-    window.consulterFormatter = (id) => `<a class="btn btn-sm btn-outline-secondary" href="${route('stock.inventaires.show', id)}" title="Consulter"><i class="fas fa-eye"></i></a>`;
+    window.consulterFormatter = (id) => `
+        <a class="btn btn-sm btn-outline-secondary" href="${route('stock.inventaires.show', id)}" title="Consulter"><i class="fas fa-eye"></i></a>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-apercu-pdf="${route('stock.inventaires.imprimer', id)}" data-titre="Procès-verbal d'inventaire" title="Imprimer le procès-verbal"><i class="fas fa-print"></i></button>`;
 </script>
 @endpush

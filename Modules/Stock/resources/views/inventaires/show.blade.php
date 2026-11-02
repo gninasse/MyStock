@@ -13,6 +13,13 @@
     $negatifs = $inventaire->lignes->where('ecart', '<', 0)->count();
 @endphp
 <div class="card mb-3">
+    <div class="card-header d-flex align-items-center">
+        <h3 class="card-title mb-0">{{ $inventaire->magasin->libelle }}</h3>
+        <button type="button" class="btn btn-outline-secondary btn-sm ms-auto" data-apercu-pdf="{{ route('stock.inventaires.imprimer', $inventaire->id) }}"
+                data-titre="Procès-verbal d'inventaire du {{ $inventaire->date_inventaire->format('d/m/Y') }}">
+            <i class="fas fa-print"></i> Imprimer le procès-verbal
+        </button>
+    </div>
     <div class="card-body">
         <dl class="row mb-0">
             <dt class="col-sm-3">Magasin</dt><dd class="col-sm-9">{{ $inventaire->magasin->libelle }} ({{ $inventaire->magasin->code }})</dd>

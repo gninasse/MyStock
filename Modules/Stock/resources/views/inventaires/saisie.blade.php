@@ -28,6 +28,20 @@
                     @endforeach
                 </select>
             </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <div class="btn-group" id="fiche-comptage">
+                    <button type="button" class="btn btn-outline-secondary" id="btn-fiche-comptage" disabled
+                            data-titre="Fiche de comptage" title="Choisissez d'abord un magasin">
+                        <i class="fas fa-clipboard-list"></i> Fiche de comptage
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" id="btn-fiche-options" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+                        <span class="visually-hidden">Options</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><button type="button" class="dropdown-item" id="btn-fiche-theorique" data-titre="Fiche de comptage (avec stock théorique)">Avec le stock théorique</button></li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 

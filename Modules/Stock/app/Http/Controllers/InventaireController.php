@@ -4,8 +4,11 @@ namespace Modules\Stock\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Modules\Core\Services\PdfService;
 use Modules\Referentiel\Models\Categorie;
 use Modules\Referentiel\Models\Magasin;
+use Modules\Referentiel\Services\Parametres;
 use Modules\Referentiel\Services\PerimetreMagasins;
 use Modules\Stock\Models\Inventaire;
 use Modules\Stock\Services\InventaireService;
@@ -103,6 +106,72 @@ class InventaireController extends Controller
             'inventaire' => $inventaire,
             'unitesMesure' => config('referentiel.unites_mesure'),
         ]);
+    }
+
+    /**
+     * Fiche de comptage vierge du magasin (comptage à l'aveugle par défaut : sans stock théorique).
+     */
+    public function ficheComptage(Request $request)
+    {
+        $data = $request->validate([
+            'magasin_id' => ['required', 'integer', 'exists:magasins,id'],
+            'categorie_id' => ['nullable', 'integer', 'exists:categories,id'],
+            'theorique' => ['nullable', 'boolean'],
+        ]);
+        $magasin = $this->magasinAccessible($request, $data['magasin_id']);
+        $categories = Categorie::pluck('libelle', 'id');
+
+        $articles = collect($this->inventaires->articlesAInventorier($magasin))
+            ->when($data['categorie_id'] ?? null, fn ($c, $id) => $c->where('categorie_id', (int) $id))
+            ->sortBy(fn ($a) => ($categories[$a['categorie_id']] ?? '').'|'.$a['code']);
+
+        $lots = Parametres::get('lots_actifs')
+            ? DB::table('stocks_lots as s')->join('lots as l', 'l.id', '=', 's.lot_id')
+                ->where('s.magasin_id', $magasin->id)->where('s.quantite', '>', 0)
+                ->orderBy('l.date_peremption')
+                ->get(['l.article_id', 'l.numero', 'l.date_peremption'])->groupBy('article_id')
+            : collect();
+
+        $this->journaliser('fiche_comptage_imprimee', $request, $magasin, ['categorie_id' => $data['categorie_id'] ?? null]);
+
+        return app(PdfService::class)->rendre('stock::pdf.fiche-comptage', [
+            'magasin' => $magasin,
+            'groupes' => $articles->groupBy(fn ($a) => $categories[$a['categorie_id']] ?? 'Sans catégorie'),
+            'lots' => $lots,
+            'avecTheorique' => $request->boolean('theorique'),
+            'categorie' => isset($data['categorie_id']) ? $categories[$data['categorie_id']] : null,
+            'unitesMesure' => config('referentiel.unites_mesure'),
+        ], 'fiche-comptage-'.str($magasin->code)->slug().'-'.now()->format('Ymd').'.pdf');
+    }
+
+    /**
+     * Procès-verbal d'un inventaire validé : écarts constatés et ajustement généré.
+     */
+    public function imprimer(Request $request, $id)
+    {
+        $inventaire = Inventaire::with(['lignes.article.categorie', 'magasin', 'utilisateur', 'document'])->findOrFail($id);
+        $this->magasinAccessible($request, $inventaire->magasin_id);
+        $this->journaliser('inventaire_imprime', $request, $inventaire->magasin, ['inventaire_id' => $inventaire->id], $inventaire);
+
+        return app(PdfService::class)->rendre('stock::pdf.proces-verbal', [
+            'inventaire' => $inventaire,
+            'unitesMesure' => config('referentiel.unites_mesure'),
+        ], 'pv-inventaire-'.str($inventaire->magasin->code)->slug().'-'.$inventaire->date_inventaire->format('Ymd').'.pdf');
+    }
+
+    protected function journaliser(string $evenement, Request $request, Magasin $magasin, array $proprietes, $sujet = null): void
+    {
+        $journal = activity('stock')->causedBy($request->user());
+        if ($sujet) {
+            $journal->performedOn($sujet);
+        }
+        $journal->withProperties($proprietes + ['magasin_id' => $magasin->id])
+            ->tap(function ($activity) use ($request) {
+                $activity->module = 'stock';
+                $activity->ip_address = $request->ip();
+                $activity->user_agent = $request->userAgent();
+            })
+            ->log($evenement);
     }
 
     protected function magasinAccessible(Request $request, $magasinId): Magasin

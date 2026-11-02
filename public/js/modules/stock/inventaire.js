@@ -68,6 +68,18 @@ $(function () {
     $('#filtre-categorie, #filtre-stock').on('change', afficher);
     $('#filtre-recherche').on('input', afficher);
 
+    // Fiche de comptage imprimable : suit le magasin et la catégorie choisis
+    function majFicheComptage() {
+        const magasinId = $('#magasin_id').val();
+        const parametres = { magasin_id: magasinId };
+        if ($('#filtre-categorie').val()) parametres.categorie_id = $('#filtre-categorie').val();
+        $('#btn-fiche-comptage, #btn-fiche-options').prop('disabled', !magasinId).attr('title', magasinId ? '' : "Choisissez d'abord un magasin");
+        if (!magasinId) return;
+        $('#btn-fiche-comptage').attr('data-apercu-pdf', route('stock.inventaires.fiche-comptage', parametres));
+        $('#btn-fiche-theorique').attr('data-apercu-pdf', route('stock.inventaires.fiche-comptage', { ...parametres, theorique: 1 }));
+    }
+    $('#magasin_id, #filtre-categorie').on('change', majFicheComptage);
+
     $('#magasin_id').on('change', function () {
         const magasinId = this.value;
         $('#zone-comptage').toggleClass('d-none', !magasinId);
