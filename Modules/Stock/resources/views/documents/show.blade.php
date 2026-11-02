@@ -25,21 +25,27 @@
     <div class="card-header d-flex align-items-center">
         <h3 class="card-title mb-0">{{ $libelles[$document->type] }} {{ $document->reference }}</h3>
         <span class="badge text-bg-{{ $statuts[$document->statut][1] }} ms-2">{{ $statuts[$document->statut][0] }}</span>
-        @if ($document->estBrouillon() && $permissionSaisie && auth()->user()->can($permissionSaisie))
-            <a href="{{ route('stock.documents.edit', $document->id) }}" class="btn btn-primary btn-sm ms-auto"><i class="fas fa-edit"></i> Modifier</a>
-        @endif
-        @if ($peutRetourner)
-            <a href="{{ route('stock.documents.retour', $document->id) }}" class="btn btn-outline-primary btn-sm ms-auto"><i class="fas fa-undo"></i> Retourner au magasin source</a>
-        @endif
-        @if ($peutReceptionner)
-            <a href="{{ route('stock.transferts.reception', $document->id) }}" class="btn btn-success btn-sm ms-auto"><i class="fas fa-dolly"></i> Réceptionner</a>
-        @endif
-        @if ($peutAnnulerTransfert)
-            <button type="button" class="btn btn-outline-danger btn-sm {{ $peutReceptionner ? 'ms-2' : 'ms-auto' }}" id="btn-annuler-transfert"
-                    data-url="{{ route('stock.documents.annuler-transfert', $document->id) }}" data-reference="{{ $document->reference }}">
-                <i class="fas fa-undo"></i> Annuler le transfert
+        <div class="ms-auto d-flex flex-wrap gap-2">
+            @if ($document->estBrouillon() && $permissionSaisie && auth()->user()->can($permissionSaisie))
+                <a href="{{ route('stock.documents.edit', $document->id) }}" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i> Modifier</a>
+            @endif
+            @if ($peutRetourner)
+                <a href="{{ route('stock.documents.retour', $document->id) }}" class="btn btn-outline-primary btn-sm"><i class="fas fa-undo"></i> Retourner au magasin source</a>
+            @endif
+            @if ($peutReceptionner)
+                <a href="{{ route('stock.transferts.reception', $document->id) }}" class="btn btn-success btn-sm"><i class="fas fa-dolly"></i> Réceptionner</a>
+            @endif
+            @if ($peutAnnulerTransfert)
+                <button type="button" class="btn btn-outline-danger btn-sm" id="btn-annuler-transfert"
+                        data-url="{{ route('stock.documents.annuler-transfert', $document->id) }}" data-reference="{{ $document->reference }}">
+                    <i class="fas fa-undo"></i> Annuler le transfert
+                </button>
+            @endif
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-apercu-pdf="{{ route('stock.documents.imprimer', $document->id) }}"
+                    data-titre="{{ $libelles[$document->type] }} {{ $document->reference }}">
+                <i class="fas fa-print"></i> Imprimer le bon
             </button>
-        @endif
+        </div>
     </div>
     <div class="card-body">
         <dl class="row mb-0">

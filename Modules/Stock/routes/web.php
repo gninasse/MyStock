@@ -12,6 +12,7 @@ Route::middleware(['auth'])->prefix('stock')->name('stock.')->group(function () 
             Route::get('/', [DocumentController::class, 'index'])->name('index');
             Route::get('/data', [DocumentController::class, 'getData'])->name('data');
             Route::get('/{id}', [DocumentController::class, 'show'])->whereNumber('id')->name('show');
+            Route::get('/{id}/imprimer', [DocumentController::class, 'imprimer'])->whereNumber('id')->name('imprimer');
         });
         // Les droits de saisie dépendent du type du document : contrôlés dans le contrôleur
         Route::get('/{id}/modifier', [DocumentController::class, 'modifier'])->name('edit');

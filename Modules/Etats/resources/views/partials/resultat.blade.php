@@ -23,10 +23,8 @@
         @can('etats.export')
         <div class="ms-auto no-print">
             <a href="{{ request()->fullUrlWithQuery(['format' => 'excel']) }}" class="btn btn-success btn-sm"><i class="fas fa-file-excel"></i> Excel</a>
-            <a href="{{ request()->fullUrlWithQuery(['format' => 'pdf']) }}" class="btn btn-danger btn-sm"><i class="fas fa-file-pdf"></i> PDF</a>
-            <button type="button" class="btn btn-secondary btn-sm" id="btn-imprimer"
-                    data-titre="{{ $etat->titre }}" data-filtres="{{ json_encode($etat->filtres) }}">
-                <i class="fas fa-print"></i> Imprimer
+            <button type="button" class="btn btn-danger btn-sm" data-apercu-pdf="{{ request()->fullUrlWithQuery(['format' => 'pdf']) }}" data-titre="{{ $etat->titre }}">
+                <i class="fas fa-file-pdf"></i> PDF / Imprimer
             </button>
         </div>
         @endcan
@@ -111,11 +109,6 @@
             $(this).find('.fa-chevron-right, .fa-chevron-down').toggleClass('fa-chevron-right fa-chevron-down');
         });
 
-        // L'impression est journalisée avant d'ouvrir l'aperçu (SFD 9.5)
-        $('#btn-imprimer').on('click', function () {
-            $.post(route('etats.impression'), { titre: $(this).data('titre'), filtres: $(this).data('filtres') })
-                .always(() => window.print());
-        });
     });
 </script>
 @endpush

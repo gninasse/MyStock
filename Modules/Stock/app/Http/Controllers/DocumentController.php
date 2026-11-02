@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\User;
+use Modules\Core\Services\PdfService;
 use Modules\Referentiel\Models\Article;
 use Modules\Referentiel\Models\Categorie;
 use Modules\Referentiel\Models\Magasin;
@@ -91,8 +92,7 @@ class DocumentController extends Controller
             'validateur', 'recepteur', 'documentAnnule', 'annulation', 'inventaire', 'documentOrigine', 'documentsLies'])
             ->findOrFail($id);
         $user = $request->user();
-        abort_unless($this->perimetre->peutAcceder($user, $document->magasin)
-            || ($document->type === Document::TRANSFERT && $this->perimetre->peutAcceder($user, $document->magasinDestination)), 403);
+        $this->autoriserConsultation($user, $document);
 
         return view('stock::documents.show', [
             'document' => $document,
@@ -105,6 +105,25 @@ class DocumentController extends Controller
                 && $user->can('stock.transferts.saisir') && $this->perimetre->peutAcceder($user, $document->magasin),
             'unitesMesure' => config('referentiel.unites_mesure'),
         ]);
+    }
+
+    /**
+     * Bon imprimable du document (aperçu PDF en modale, ?telecharger=1 pour le fichier).
+     */
+    public function imprimer(Request $request, $id)
+    {
+        $document = Document::with(['lignes.article', 'lignes.lots.lot', 'magasin', 'magasinDestination', 'direction', 'service', 'unite',
+            'utilisateur', 'validateur', 'recepteur', 'documentAnnule', 'annulation', 'documentOrigine.magasin', 'inventaire'])
+            ->findOrFail($id);
+        $this->autoriserConsultation($request->user(), $document);
+        $this->mouvements->journaliser($document, 'document_imprime', $request->user());
+
+        $nom = str($document->reference ?? 'brouillon-'.$document->id)->slug().'.pdf';
+
+        return app(PdfService::class)->rendre('stock::pdf.document', [
+            'document' => $document,
+            'unitesMesure' => config('referentiel.unites_mesure'),
+        ], $nom);
     }
 
     public function creer(Request $request, string $type)
@@ -276,6 +295,16 @@ class DocumentController extends Controller
         abort_unless(isset(self::TYPES[$segment]), 404);
 
         return self::TYPES[$segment];
+    }
+
+    /**
+     * Consultation : magasin du document, ou magasin destinataire d'un transfert.
+     */
+    protected function autoriserConsultation(User $user, Document $document): void
+    {
+        abort_unless($this->perimetre->peutAcceder($user, $document->magasin)
+            || ($document->type === Document::TRANSFERT && $document->magasinDestination
+                && $this->perimetre->peutAcceder($user, $document->magasinDestination)), 403);
     }
 
     protected function autoriserType(User $user, string $type): void

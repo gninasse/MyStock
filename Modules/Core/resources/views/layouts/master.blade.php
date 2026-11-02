@@ -123,6 +123,7 @@
       <!--end::Footer-->
     </div>
     <!--end::App Wrapper-->
+    @include('core::layouts.partials.apercu-pdf')
     <!--begin::Script-->
     <!--begin::Third Party Plugin(jquery)-->
     <script
@@ -181,6 +182,7 @@
     @routes
     <!--end::Ziggy Routes-->
     
+    <script src="{{ asset('js/commun/apercu-pdf.js') }}"></script>
     @stack('js')
   </body>
   <!--end::Body-->

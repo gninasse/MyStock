@@ -2,7 +2,7 @@
 
 namespace Modules\Etats\Services;
 
-use Barryvdh\DomPDF\Facade\Pdf;
+use Modules\Core\Services\PdfService;
 use Modules\Etats\Support\Etat;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -90,17 +90,8 @@ class ExportService
     {
         $this->journaliser($etat, 'PDF');
 
-        $pdf = Pdf::loadView('etats::pdf', ['etat' => $etat])
-            // N'embarquer que les caractères utilisés de la police : ~30 Ko au lieu de ~900 Ko
-            ->setOption('isFontSubsettingEnabled', true)
-            ->setPaper('a4', count($etat->colonnes) > 6 ? 'landscape' : 'portrait');
-
-        // Le total de pages n'est connu qu'après le rendu : numérotation posée sur le canevas
-        $pdf->render();
-        $canevas = $pdf->getDomPDF()->getCanvas();
-        $canevas->page_text($canevas->get_width() - 90, $canevas->get_height() - 25, 'Page {PAGE_NUM} / {PAGE_COUNT}', null, 8, [0.33, 0.33, 0.33]);
-
-        return $pdf->download($etat->nomFichier('pdf'));
+        return app(PdfService::class)->rendre('etats::pdf', ['etat' => $etat], $etat->nomFichier('pdf'),
+            count($etat->colonnes) > 6 ? 'landscape' : 'portrait');
     }
 
     public function journaliser(Etat $etat, string $format): void

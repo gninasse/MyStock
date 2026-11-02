@@ -20,6 +20,8 @@ return [
     'transfert_receptionne' => 'Transfert réceptionné',
     'transfert_annule' => 'Transfert annulé',
     'inventaire_valide' => 'Inventaire validé',
+    'document_imprime' => 'Bon imprimé',
+    'inventaire_imprime' => 'Inventaire imprimé',
     'export' => 'Export d\'un état',
     'parametres_modifies' => 'Paramètres modifiés',
     'articles_frequents_modifies' => 'Articles fréquents modifiés',

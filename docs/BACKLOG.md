@@ -52,3 +52,19 @@ Une tâche par itération de la boucle de développement : implémenter, tester
 
 - Vérification dans le navigateur des écrans des tâches 2 à 8 (extension Chrome
   déconnectée pendant toute la boucle ; les écrans sont couverts par les tests HTTP).
+
+## Lot 5 — Imprimés, aperçu PDF, états et statistiques
+
+- [x] 9. **Aperçu PDF en modale** : composant global (iframe, télécharger, imprimer,
+      nouvel onglet) déclenché par `data-apercu-pdf` ; PDF servis en ligne (`inline`),
+      téléchargement par `?telecharger=1` ; les exports PDF des états passent par la modale.
+- [x] 10. **Imprimés des documents** : bon d'entrée, de sortie, de transfert (signatures
+      expéditeur / transporteur / réceptionnaire), de réception, de réintégration,
+      d'ajustement ; filigrane BROUILLON / ANNULÉ ; impression journalisée.
+- [ ] 11. **Imprimés d'inventaire** : fiche de comptage vierge (par magasin, catégorie)
+      et procès-verbal d'inventaire (écarts, signatures).
+- [ ] 12. **Nouveaux états** : consommation par service, couverture de stock et risque
+      de rupture, articles dormants, écarts d'inventaire (exports Excel / PDF).
+- [ ] 13. **Statistiques** : page de pilotage (indicateurs, évolution mensuelle des
+      mouvements, articles les plus consommés, consommation par service, stock par
+      catégorie, performance des transferts) filtrable par période et magasin.

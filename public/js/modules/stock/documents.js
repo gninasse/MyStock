@@ -12,6 +12,10 @@ const TYPES = {
     RECEPTION: '<span class="badge text-bg-success">Réception</span>',
     REINTEGRATION: '<span class="badge text-bg-light border">Réintégration</span>'
 };
+const TYPES_TEXTE = {
+    ENTREE: "Bon d'entrée", SORTIE: 'Bon de sortie', AJUSTEMENT: "Bon d'ajustement",
+    TRANSFERT: 'Bon de transfert', RECEPTION: 'Bon de réception', REINTEGRATION: 'Bon de réintégration'
+};
 const STATUTS = {
     BROUILLON: '<span class="badge text-bg-secondary">Brouillon</span>',
     EN_TRANSIT: '<span class="badge text-bg-warning">En transit</span>',
@@ -26,6 +30,7 @@ window.statutDocumentFormatter = (value) => STATUTS[value] ?? value;
 
 window.actionsFormatter = (id, row) => {
     let html = `<a class="btn btn-sm btn-outline-secondary" href="${route('stock.documents.show', id)}" title="Consulter"><i class="fas fa-eye"></i></a>`;
+    html += ` <button type="button" class="btn btn-sm btn-outline-secondary" data-apercu-pdf="${route('stock.documents.imprimer', id)}" data-titre="${echapper((TYPES_TEXTE[row.type] ?? '') + ' ' + (row.reference ?? ''))}" title="Imprimer le bon"><i class="fas fa-print"></i></button>`;
     if (row.modifiable) {
         html += ` <a class="btn btn-sm btn-outline-primary" href="${route('stock.documents.edit', id)}" title="Modifier"><i class="fas fa-edit"></i></a>`;
         html += ` <button class="btn btn-sm btn-outline-danger btn-supprimer" title="Supprimer"><i class="fas fa-trash"></i></button>`;
