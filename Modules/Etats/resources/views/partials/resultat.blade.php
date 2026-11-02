@@ -84,9 +84,11 @@
 
     @if ($etat->pied)
         <div class="card-footer">
-            @foreach ($etat->pied as $libelle => $valeur)
-                <strong>{{ $libelle }} : {{ $valeur }}</strong>
-            @endforeach
+            <div class="d-flex flex-wrap gap-4">
+                @foreach ($etat->pied as $libelle => $valeur)
+                    <span><span class="text-muted">{{ $libelle }} :</span> <strong>{{ $valeur }}</strong></span>
+                @endforeach
+            </div>
         </div>
     @endif
 </div>

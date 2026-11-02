@@ -6,5 +6,5 @@ return [
     'admin' => ['permissions' => ['etats.*']],
     'gestionnaire' => ['permissions' => ['etats.*']],
     'operateur' => ['permissions' => ['etats.stock-magasin', 'etats.stock-categorie', 'etats.transferts', 'etats.export', 'etats.alertes']],
-    'consultant' => ['permissions' => ['etats.stock-magasin', 'etats.stock-categorie', 'etats.fiche-stock', 'etats.transferts', 'etats.export']],
+    'consultant' => ['permissions' => ['etats.stock-magasin', 'etats.stock-categorie', 'etats.fiche-stock', 'etats.transferts', 'etats.export', 'etats.analyses', 'etats.statistiques']],
 ];

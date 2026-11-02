@@ -5,11 +5,13 @@ namespace Modules\Etats\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Modules\Core\Models\User;
+use Modules\Etats\Services\AnalysesService;
 use Modules\Etats\Services\EtatsService;
 use Modules\Etats\Services\ExportService;
 use Modules\Etats\Support\Etat;
 use Modules\Referentiel\Models\Article;
 use Modules\Referentiel\Models\Categorie;
+use Modules\Referentiel\Models\Direction;
 
 /**
  * États de la SFD 9. Chaque état s'affiche, s'imprime ou s'exporte
@@ -17,7 +19,7 @@ use Modules\Referentiel\Models\Categorie;
  */
 class EtatController extends Controller
 {
-    public function __construct(protected EtatsService $etats, protected ExportService $exports) {}
+    public function __construct(protected EtatsService $etats, protected ExportService $exports, protected AnalysesService $analyses) {}
 
     public function stockMagasin(Request $request)
     {
@@ -104,6 +106,72 @@ class EtatController extends Controller
         ]);
 
         return $this->rendre($request, 'peremptions', $this->etats->peremptions($filtres, $request->user()), $filtres);
+    }
+
+    public function consommation(Request $request)
+    {
+        $filtres = $request->validate($this->reglesPeriode() + [
+            'magasin_id' => ['nullable', 'integer'],
+            'direction_id' => ['nullable', 'integer'],
+            'categorie_id' => ['nullable', 'integer'],
+        ], $this->messagesPeriode());
+
+        return $this->rendre($request, 'consommation', $this->analyses->consommationParService($filtres, $request->user()), $filtres, [
+            'directions' => Direction::orderBy('libelle')->get(),
+            'categories' => Categorie::orderBy('libelle')->get(),
+        ]);
+    }
+
+    public function couverture(Request $request)
+    {
+        $filtres = $request->validate([
+            'magasin_id' => ['nullable', 'integer'],
+            'categorie_id' => ['nullable', 'integer'],
+            'jours' => ['nullable', 'integer', 'in:30,60,90,180,365'],
+            'cible' => ['nullable', 'integer', 'min:1', 'max:365'],
+        ]) + ['a_risque' => $request->boolean('a_risque')];
+
+        return $this->rendre($request, 'couverture', $this->analyses->couverture($filtres, $request->user()), $filtres, [
+            'categories' => Categorie::orderBy('libelle')->get(),
+        ]);
+    }
+
+    public function dormants(Request $request)
+    {
+        $filtres = $request->validate([
+            'magasin_id' => ['nullable', 'integer'],
+            'categorie_id' => ['nullable', 'integer'],
+            'jours' => ['nullable', 'integer', 'min:7', 'max:730'],
+        ]);
+
+        return $this->rendre($request, 'dormants', $this->analyses->dormants($filtres, $request->user()), $filtres, [
+            'categories' => Categorie::orderBy('libelle')->get(),
+        ]);
+    }
+
+    public function ecartsInventaire(Request $request)
+    {
+        $filtres = $request->validate($this->reglesPeriode() + [
+            'magasin_id' => ['nullable', 'integer'],
+            'categorie_id' => ['nullable', 'integer'],
+        ], $this->messagesPeriode());
+
+        return $this->rendre($request, 'ecarts-inventaire', $this->analyses->ecartsInventaire($filtres, $request->user()), $filtres, [
+            'categories' => Categorie::orderBy('libelle')->get(),
+        ]);
+    }
+
+    protected function reglesPeriode(): array
+    {
+        return [
+            'date_du' => ['nullable', 'date_format:Y-m-d'],
+            'date_au' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:date_du'],
+        ];
+    }
+
+    protected function messagesPeriode(): array
+    {
+        return ['date_au.after_or_equal' => 'La date de fin doit suivre la date de début.'];
     }
 
     /**

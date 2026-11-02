@@ -6,6 +6,8 @@ return [
     'etats.journal' => 'Consulter le journal des mouvements',
     'etats.fiche-stock' => 'Consulter la fiche de stock',
     'etats.transferts' => 'Consulter l\'état des transferts entre magasins',
+    'etats.analyses' => 'Consulter les analyses (consommation, couverture, dormants, écarts d\'inventaire)',
+    'etats.statistiques' => 'Consulter les statistiques de pilotage',
     'etats.export' => 'Exporter et imprimer les états',
     'etats.alertes' => 'Voir les alertes de stock minimum',
 ];

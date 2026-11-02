@@ -17,6 +17,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/fiche-de-stock', [EtatController::class, 'ficheStock'])->middleware('permission:etats.fiche-stock')->name('fiche-stock');
         Route::get('/transferts', [EtatController::class, 'transferts'])->middleware('permission:etats.transferts')->name('transferts');
         Route::get('/peremptions', [EtatController::class, 'peremptions'])->middleware('permission:etats.alertes')->name('peremptions');
+        Route::middleware('permission:etats.analyses')->group(function () {
+            Route::get('/consommation-par-service', [EtatController::class, 'consommation'])->name('consommation');
+            Route::get('/couverture-de-stock', [EtatController::class, 'couverture'])->name('couverture');
+            Route::get('/articles-dormants', [EtatController::class, 'dormants'])->name('dormants');
+            Route::get('/ecarts-inventaire', [EtatController::class, 'ecartsInventaire'])->name('ecarts-inventaire');
+        });
         Route::post('/impression', [EtatController::class, 'impression'])->name('impression');
     });
 });

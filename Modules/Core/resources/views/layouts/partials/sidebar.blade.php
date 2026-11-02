@@ -257,6 +257,43 @@
                 </ul>
               </li>
               @endcanany
+              @can('etats.analyses')
+              <li class="nav-item {{ request()->routeIs('etats.consommation', 'etats.couverture', 'etats.dormants', 'etats.ecarts-inventaire') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ request()->routeIs('etats.consommation', 'etats.couverture', 'etats.dormants', 'etats.ecarts-inventaire') ? 'active' : '' }}">
+                  <i class="nav-icon bi bi-graph-up-arrow"></i>
+                  <p>
+                    Analyses
+                    <i class="nav-arrow bi bi-chevron-right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="{{ route('etats.consommation') }}" class="nav-link {{ request()->routeIs('etats.consommation') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-people"></i>
+                      <p>Consommation par service</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="{{ route('etats.couverture') }}" class="nav-link {{ request()->routeIs('etats.couverture') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-speedometer2"></i>
+                      <p>Couverture et rupture</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="{{ route('etats.dormants') }}" class="nav-link {{ request()->routeIs('etats.dormants') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-moon-stars"></i>
+                      <p>Articles dormants</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="{{ route('etats.ecarts-inventaire') }}" class="nav-link {{ request()->routeIs('etats.ecarts-inventaire') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-clipboard-x"></i>
+                      <p>Écarts d'inventaire</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              @endcan
               @canany(['referentiel.magasins.index', 'referentiel.structures.index', 'referentiel.categories.index', 'referentiel.articles.index', 'referentiel.articles-frequents.manage'])
               <li class="nav-item {{ request()->routeIs('referentiel.*') ? 'menu-open' : '' }}">
                 <a href="#" class="nav-link {{ request()->routeIs('referentiel.*') ? 'active' : '' }}">
