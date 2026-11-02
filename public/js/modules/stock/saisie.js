@@ -64,7 +64,7 @@ $(function () {
         for (const lot of lotsParArticle[ligne.id] ?? []) {
             if (restant <= 0) break;
             const part = Math.min(restant, lot.quantite);
-            const peremption = lot.date_peremption ? ` exp. ${lot.date_peremption.split('-').reverse().join('/')}` : '';
+            const peremption = lot.date_peremption ? ` exp. ${lot.date_peremption.slice(0, 10).split('-').reverse().join('/')}` : '';
             parts.push(`${echapper(lot.numero)}${peremption} : ${part}`);
             restant -= part;
         }
