@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Etats\Http\Controllers\EtatController;
+use Modules\Etats\Http\Controllers\StatistiquesController;
 use Modules\Etats\Http\Controllers\TableauDeBordController;
 
 Route::middleware(['auth'])->group(function () {
@@ -9,6 +10,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tableau-de-bord', [TableauDeBordController::class, 'index'])
         ->middleware('permission:cores.dashboard.view')
         ->name('etats.tableau-de-bord');
+
+    Route::middleware('permission:etats.statistiques')->group(function () {
+        Route::get('/statistiques', [StatistiquesController::class, 'index'])->name('etats.statistiques');
+        Route::get('/statistiques/rapport', [StatistiquesController::class, 'rapport'])->name('etats.statistiques.rapport');
+    });
 
     Route::prefix('etats')->name('etats.')->group(function () {
         Route::get('/stock-par-magasin', [EtatController::class, 'stockMagasin'])->middleware('permission:etats.stock-magasin')->name('stock-magasin');

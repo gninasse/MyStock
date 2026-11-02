@@ -38,6 +38,14 @@
                 </a>
               </li>
               @endcan
+              @can('etats.statistiques')
+              <li class="nav-item">
+                <a href="{{ route('etats.statistiques') }}" class="nav-link {{ request()->routeIs('etats.statistiques') ? 'active' : '' }}">
+                  <i class="nav-icon bi bi-graph-up"></i>
+                  <p>Statistiques</p>
+                </a>
+              </li>
+              @endcan
               @canany(['referentiel.parametres.gerer', 'cores.users.index', 'cores.roles.index', 'cores.permissions.index', 'cores.modules.index', 'cores.activities.index'])
               <li class="nav-item {{ request()->routeIs('cores.*', 'referentiel.parametres.*') ? 'menu-open' : '' }}">
                 <a href="#" class="nav-link {{ request()->routeIs('cores.*', 'referentiel.parametres.*') ? 'active' : '' }}">

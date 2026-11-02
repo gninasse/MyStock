@@ -61,11 +61,44 @@ le tableau de bord signale leur nombre.
 *Inventaire > Saisir un inventaire* : saisir les quantités comptées. Chaque écart crée un
 ajustement (AJU-…) ; un commentaire est obligatoire s'il y a des écarts.
 
+- **Fiche de comptage** : après le choix du magasin (et éventuellement d'une catégorie),
+  le bouton « Fiche de comptage » imprime la liste des articles à compter, sans le stock
+  théorique (comptage à l'aveugle) ; l'option « Avec le stock théorique » l'ajoute.
+- **Procès-verbal** : sur un inventaire validé, « Imprimer le procès-verbal » donne la
+  fiabilité du stock, les excédents, les manquants, le détail des écarts et les signatures.
+
+## Imprimés et aperçu PDF
+
+Tout document PDF s'ouvre dans une fenêtre d'aperçu : **Imprimer**, **Télécharger** ou
+ouvrir dans un nouvel onglet. Sur la fiche d'un mouvement (ou depuis la liste des
+documents, icône imprimante), « Imprimer le bon » produit selon le type : bon d'entrée, de
+sortie, de transfert (signatures expéditeur, transporteur, destinataire), de réception, de
+réintégration ou d'ajustement. Un brouillon porte le filigrane BROUILLON, un mouvement
+annulé le filigrane ANNULÉ. Chaque impression est journalisée.
+
 ## États
 
 Stock par magasin, stock par catégorie, journal des mouvements, fiche de stock, transferts,
-péremptions. Chaque état s'imprime et s'exporte en Excel ou en PDF ; les exports sont
+péremptions. Chaque état s'exporte en Excel ou en PDF (aperçu en modale) ; les exports sont
 journalisés.
+
+## Analyses
+
+| Analyse | À quoi elle sert |
+| --- | --- |
+| Consommation par service | Qui consomme quoi sur une période ; services classés du plus au moins consommateur, part de chaque article. Sorties annulées exclues. |
+| Couverture et rupture | Nombre de jours de stock au rythme des sorties récentes, date de rupture estimée et quantité à commander pour atteindre la couverture visée. |
+| Articles dormants | Articles en stock sans sortie depuis N jours : surstock, produits à redistribuer ou à réformer. |
+| Écarts d'inventaire | Écarts constatés par article et taux d'écart ; fiabilité globale du stock. |
+
+## Statistiques
+
+*Statistiques* : indicateurs de la période (quantités consommées, bons de sortie, services
+servis, transferts et conformité des réceptions, alertes de stock, lots à surveiller ou
+fiabilité d'inventaire) comparés à la période précédente de même durée ; graphiques de
+l'activité (entrées, consommation, transferts), de la consommation par service, des
+articles les plus consommés et de la santé du stock par magasin ; flux entre magasins.
+Le bouton « Rapport d'activité » produit la synthèse imprimable en PDF.
 
 ## Journal d'audit
 

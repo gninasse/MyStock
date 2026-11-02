@@ -10,8 +10,8 @@ Le guide d'utilisation est dans [docs/GUIDE.md](docs/GUIDE.md).
 | --- | --- |
 | **Core** | Utilisateurs, rôles et permissions (Spatie), journal d'audit, commandes `cores:` |
 | **Referentiel** | Magasins et rattachements, structures (directions, services, unités), catégories, articles, articles fréquents, **paramètres de l'application** |
-| **Stock** | Entrées, sorties, transferts et réceptions, retours, annulations, inventaires, lots (FEFO) |
-| **Etats** | Stock par magasin / catégorie, journal, fiche de stock, transferts, péremptions, exports Excel/PDF, tableau de bord |
+| **Stock** | Entrées, sorties, transferts et réceptions, retours, annulations, inventaires, lots (FEFO), **bons imprimables**, fiche de comptage et PV d'inventaire |
+| **Etats** | Stock par magasin / catégorie, journal, fiche de stock, transferts, péremptions ; analyses (consommation par service, couverture et rupture, articles dormants, écarts d'inventaire) ; **statistiques** et rapport d'activité ; exports Excel/PDF (aperçu en modale), tableau de bord |
 
 ## ⚙️ Paramètres (Administration > Paramètres)
 

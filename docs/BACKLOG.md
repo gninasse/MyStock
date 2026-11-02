@@ -65,6 +65,6 @@ Une tâche par itération de la boucle de développement : implémenter, tester
       et procès-verbal d'inventaire (écarts, signatures).
 - [x] 12. **Nouveaux états** : consommation par service, couverture de stock et risque
       de rupture, articles dormants, écarts d'inventaire (exports Excel / PDF).
-- [ ] 13. **Statistiques** : page de pilotage (indicateurs, évolution mensuelle des
+- [x] 13. **Statistiques** : page de pilotage (indicateurs, évolution mensuelle des
       mouvements, articles les plus consommés, consommation par service, stock par
       catégorie, performance des transferts) filtrable par période et magasin.
