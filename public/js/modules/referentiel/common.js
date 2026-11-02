@@ -4,7 +4,8 @@
  */
 
 export function echapper(valeur) {
-    return $('<div>').text(valeur ?? '').html();
+    // Guillemets aussi : la valeur sert souvent dans un attribut (data-article="…", value="…")
+    return $('<div>').text(valeur ?? '').html().replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 window.statutFormatter = function (value) {
