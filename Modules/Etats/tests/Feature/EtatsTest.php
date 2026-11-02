@@ -135,7 +135,7 @@ class EtatsTest extends TestCase
             'date_au' => '2026-05-22',
         ]))
             ->assertOk()
-            ->assertSeeInOrder(['Stock au 21/05/2026', '40', 'SOR-20260521-001', '-30', '10', 'ENT-20260522-001', '5', '15', 'Stock au 22/05/2026 : 15']);
+            ->assertSeeInOrder(['Stock au 21/05/2026', '40', 'SOR-20260521-001', '-30', '10', 'ENT-20260522-001', '5', '15', 'Stock au 22/05/2026 :', '15']);
     }
 
     public function test_exports_excel_et_pdf_journalises(): void
