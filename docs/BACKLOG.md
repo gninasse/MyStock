@@ -76,3 +76,11 @@ Une tâche par itération de la boucle de développement : implémenter, tester
       devise, armoiries et logo (base64, sans appel réseau), libellé du document centré et
       renommable, format du numéro, « Fait à Ouagadougou, le … », pied de page. Écran
       « Administration > En-tête des documents » avec aperçu en direct et aperçu PDF.
+
+## Lot 7 — Revue des permissions
+
+- [x] 15. **Permissions de toute l'application** : routes d'administration du Core
+      protégées (elles n'étaient que masquées dans le menu), échafaudage `cores` supprimé,
+      permission « Attribuer les rôles d'un utilisateur » et « Gérer l'en-tête des
+      documents », rôle super-admin déclaré dans la matrice et protégé contre l'admin,
+      test qui refuse toute nouvelle route sans contrôle d'accès.

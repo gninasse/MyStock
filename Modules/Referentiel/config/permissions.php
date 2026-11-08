@@ -6,6 +6,7 @@ return [
 
     // Paramètres de l'application
     'referentiel.parametres.gerer' => 'Modifier les paramètres de l\'application',
+    'referentiel.entete.gerer' => 'Gérer l\'en-tête officiel des documents PDF',
 
     // Magasins
     'referentiel.magasins.index' => 'Voir la liste des magasins',

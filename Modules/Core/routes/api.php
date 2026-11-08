@@ -1,8 +1,6 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Modules\Core\Http\Controllers\CoreController;
-
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('cores', CoreController::class)->names('core');
-});
+/*
+ * API du module Core : aucune route exposée pour l'instant.
+ * Toute route ajoutée ici doit porter auth:sanctum et un middleware permission:….
+ */

@@ -6,7 +6,7 @@ use Modules\Etats\Http\Controllers\StatistiquesController;
 use Modules\Etats\Http\Controllers\TableauDeBordController;
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/', fn () => redirect()->route('etats.tableau-de-bord'));
+    Route::get('/', fn () => redirect()->route('etats.tableau-de-bord'))->name('accueil');
     Route::get('/tableau-de-bord', [TableauDeBordController::class, 'index'])
         ->middleware('permission:cores.dashboard.view')
         ->name('etats.tableau-de-bord');

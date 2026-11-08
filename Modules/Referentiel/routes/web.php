@@ -15,8 +15,10 @@ Route::middleware(['auth'])->prefix('referentiel')->name('referentiel.')->group(
     Route::middleware('permission:referentiel.parametres.gerer')->group(function () {
         Route::get('/parametres', [ParametreController::class, 'index'])->name('parametres.index');
         Route::put('/parametres', [ParametreController::class, 'update'])->name('parametres.update');
+    });
 
-        // En-tête officiel des documents PDF
+    // En-tête officiel des documents PDF
+    Route::middleware('permission:referentiel.entete.gerer')->group(function () {
         Route::get('/parametres/en-tete', [EnteteController::class, 'edit'])->name('parametres.entete');
         Route::put('/parametres/en-tete', [EnteteController::class, 'update'])->name('parametres.entete.update');
         Route::get('/parametres/en-tete/apercu', [EnteteController::class, 'apercu'])->name('parametres.entete.apercu');

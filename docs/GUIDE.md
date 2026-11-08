@@ -4,10 +4,19 @@
 
 | Rôle | Peut faire |
 | --- | --- |
-| Administrateur | Tout, y compris utilisateurs, paramètres, annulations et journal d'audit |
-| Gestionnaire | Entrées, sorties, transferts, réceptions, inventaires et états de ses magasins |
-| Opérateur | Entrées et réception des transferts de ses magasins, états de stock |
-| Consultant | Consultation des états de tous les magasins |
+| Super-administrateur | Rôle technique : tous les droits, et seul à gérer les rôles, la matrice des permissions, les permissions directes et les modules |
+| Administrateur | Tous les droits métier : utilisateurs (création, modification, rôles métier, mot de passe, activation), paramètres, en-tête des documents, annulation des mouvements validés, journal d'audit, états, analyses et statistiques |
+| Gestionnaire | Entrées, sorties, transferts, réceptions et inventaires de ses magasins ; tous les états, analyses et statistiques |
+| Opérateur | Entrées et réception des transferts de ses magasins ; états de stock, transferts et alertes |
+| Consultant | Consultation de tous les magasins : états de stock, fiche de stock, transferts, analyses et statistiques |
+
+Un administrateur ne peut ni attribuer le rôle super-administrateur, ni modifier,
+réinitialiser ou désactiver un compte super-administrateur. Le premier super-administrateur se
+crée en ligne de commande : `php artisan cores:make-superadmin email@exemple.com`.
+
+Chaque écran et chaque action est protégé côté serveur par sa permission, pas seulement
+masqué dans le menu : une adresse saisie à la main sans le droit correspondant renvoie
+« Accès refusé ».
 
 Un utilisateur ne voit que les magasins auxquels il est rattaché (ou dont il est responsable),
 sauf s'il a la permission « Accéder à tous les magasins ».

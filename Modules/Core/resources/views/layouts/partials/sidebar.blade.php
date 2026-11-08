@@ -46,7 +46,7 @@
                 </a>
               </li>
               @endcan
-              @canany(['referentiel.parametres.gerer', 'cores.users.index', 'cores.roles.index', 'cores.permissions.index', 'cores.modules.index', 'cores.activities.index'])
+              @canany(['referentiel.parametres.gerer', 'referentiel.entete.gerer', 'cores.users.index', 'cores.roles.index', 'cores.permissions.index', 'cores.modules.index', 'cores.activities.index'])
               <li class="nav-item {{ request()->routeIs('cores.*', 'referentiel.parametres.*') ? 'menu-open' : '' }}">
                 <a href="#" class="nav-link {{ request()->routeIs('cores.*', 'referentiel.parametres.*') ? 'active' : '' }}">
                   <i class="nav-icon bi bi-gear"></i>
@@ -72,6 +72,8 @@
                       <p>Paramètres</p>
                     </a>
                   </li>
+                  @endcan
+                  @can('referentiel.entete.gerer')
                   <li class="nav-item">
                     <a href="{{ route('referentiel.parametres.entete') }}" class="nav-link {{ request()->routeIs('referentiel.parametres.entete*') ? 'active' : '' }}">
                       <i class="nav-icon bi bi-file-earmark-richtext"></i>

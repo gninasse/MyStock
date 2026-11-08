@@ -8,11 +8,13 @@
 @endsection
 
 @section('content')
+@can('referentiel.entete.gerer')
 <div class="alert alert-light border d-flex align-items-center gap-3 mb-3">
     <i class="bi bi-file-earmark-richtext fs-4 text-primary"></i>
     <div class="flex-grow-1">L'en-tête officiel des documents PDF (hiérarchie, armoiries, devise, libellés) se règle sur un écran dédié.</div>
     <a href="{{ route('referentiel.parametres.entete') }}" class="btn btn-sm btn-outline-primary">En-tête des documents</a>
 </div>
+@endcan
 <form id="form-parametres" data-url="{{ route('referentiel.parametres.update') }}">
     @foreach ($groupes as $groupe => $definitions)
         <div class="card mb-3">

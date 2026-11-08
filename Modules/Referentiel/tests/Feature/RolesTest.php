@@ -6,10 +6,10 @@ use Modules\Core\Models\Role;
 
 class RolesTest extends ReferentielTestCase
 {
-    public function test_les_quatre_roles_existent(): void
+    public function test_les_roles_existent(): void
     {
         $this->assertEqualsCanonicalizing(
-            ['admin', 'gestionnaire', 'operateur', 'consultant'],
+            ['super-admin', 'admin', 'gestionnaire', 'operateur', 'consultant'],
             Role::pluck('name')->all()
         );
     }
@@ -39,6 +39,6 @@ class RolesTest extends ReferentielTestCase
     {
         $this->seed(\Modules\Referentiel\Database\Seeders\RolesSeeder::class);
 
-        $this->assertSame(4, Role::count());
+        $this->assertSame(5, Role::count());
     }
 }

@@ -5,6 +5,12 @@
  * ses propres permissions aux rôles dans son fichier config/roles.php.
  */
 return [
+    // Rôle technique : tous les droits (le Gate::before du Core le laisse aussi passer partout).
+    // Seul rôle qui administre les rôles, la matrice des permissions et les modules.
+    'super-admin' => [
+        'description' => 'Super-administrateur technique : tous les droits, dont les rôles, les permissions et les modules',
+        'permissions' => ['cores.*', 'referentiel.*'],
+    ],
     'admin' => [
         'description' => 'Administrateur : tous les droits métier, utilisateurs et journal d\'audit',
         'permissions' => [
@@ -15,6 +21,7 @@ return [
             'cores.users.update',
             'cores.users.reset-password',
             'cores.users.toggle-status',
+            'cores.users.roles',
             'cores.activities.index',
             'cores.activities.data',
             'cores.activities.show',

@@ -7,9 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use Modules\Core\Http\Requests\StoreUserRequest;
 use Modules\Core\Http\Requests\UpdateUserRequest;
 use Modules\Core\Models\User;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -142,6 +145,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, $id)
     {
+        $this->protegerSuperAdmin(User::findOrFail($id));
         try {
             $user = User::findOrFail($id);
 
@@ -197,6 +201,7 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
+        $this->protegerSuperAdmin(User::findOrFail($id));
         try {
             $user = User::findOrFail($id);
 
@@ -227,6 +232,7 @@ class UserController extends Controller
      */
     public function resetPassword($id)
     {
+        $this->protegerSuperAdmin(User::findOrFail($id));
         try {
             $user = User::findOrFail($id);
             $newPassword = config('core.user_default_password', 'password'); // Default password
@@ -250,6 +256,7 @@ class UserController extends Controller
      */
     public function toggleStatus($id)
     {
+        $this->protegerSuperAdmin(User::findOrFail($id));
         try {
             $user = User::findOrFail($id);
 
@@ -283,6 +290,7 @@ class UserController extends Controller
      */
     public function updateProfile(Request $request, $id)
     {
+        $this->protegerSuperAdmin(User::findOrFail($id));
         try {
             $user = User::findOrFail($id);
 
@@ -307,7 +315,7 @@ class UserController extends Controller
                 'message' => 'Profil mis à jour avec succès',
                 'data' => $user,
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur de validation',
@@ -326,6 +334,7 @@ class UserController extends Controller
      */
     public function updateAvatar(Request $request, $id)
     {
+        $this->protegerSuperAdmin(User::findOrFail($id));
         try {
             $user = User::findOrFail($id);
 
@@ -358,7 +367,7 @@ class UserController extends Controller
                 'message' => 'Avatar mis à jour avec succès',
                 'avatar_url' => $user->avatar_url,
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur de validation',
@@ -381,7 +390,8 @@ class UserController extends Controller
             $user = User::findOrFail($id);
             $assignedRoleIds = $user->roles->pluck('id')->toArray();
 
-            $availableRoles = \Spatie\Permission\Models\Role::whereNotIn('id', $assignedRoleIds)
+            $availableRoles = Role::whereNotIn('id', $assignedRoleIds)
+                ->when(! auth()->user()->hasRole('super-admin'), fn ($q) => $q->where('name', '!=', 'super-admin'))
                 ->get()
                 ->map(function ($role) {
                     return [
@@ -408,6 +418,7 @@ class UserController extends Controller
      */
     public function assignRole(Request $request, $id)
     {
+        $this->protegerSuperAdmin(User::findOrFail($id), Role::find($request->input('role_id')));
         try {
             $user = User::findOrFail($id);
 
@@ -415,7 +426,7 @@ class UserController extends Controller
                 'role_id' => ['required', 'exists:roles,id'],
             ]);
 
-            $role = \Spatie\Permission\Models\Role::findOrFail($request->role_id);
+            $role = Role::findOrFail($request->role_id);
 
             // Check if user already has this role
             if ($user->hasRole($role)) {
@@ -451,6 +462,7 @@ class UserController extends Controller
      */
     public function removeRole(Request $request, $id)
     {
+        $this->protegerSuperAdmin(User::findOrFail($id), Role::find($request->input('role_id')));
         try {
             $user = User::findOrFail($id);
 
@@ -458,7 +470,7 @@ class UserController extends Controller
                 'role_id' => ['required', 'exists:roles,id'],
             ]);
 
-            $role = \Spatie\Permission\Models\Role::findOrFail($request->role_id);
+            $role = Role::findOrFail($request->role_id);
 
             if (! $user->hasRole($role)) {
                 return response()->json([
@@ -494,7 +506,7 @@ class UserController extends Controller
                 'permission_id' => ['required', 'exists:permissions,id'],
             ]);
 
-            $permission = \Spatie\Permission\Models\Permission::findOrFail($request->permission_id);
+            $permission = Permission::findOrFail($request->permission_id);
 
             if (! $user->hasDirectPermission($permission)) {
                 return response()->json([
@@ -527,7 +539,7 @@ class UserController extends Controller
             $user = User::findOrFail($id);
             $assignedPermissionIds = $user->getAllPermissions()->pluck('id')->toArray();
 
-            $availablePermissions = \Spatie\Permission\Models\Permission::whereNotIn('id', $assignedPermissionIds)
+            $availablePermissions = Permission::whereNotIn('id', $assignedPermissionIds)
                 ->get()
                 ->groupBy('module')
                 ->map(function ($permissions, $module) {
@@ -543,7 +555,7 @@ class UserController extends Controller
                     ];
                 })->values();
 
-            $modules = \Spatie\Permission\Models\Permission::distinct()->pluck('module')->filter()->values();
+            $modules = Permission::distinct()->pluck('module')->filter()->values();
 
             return response()->json([
                 'success' => true,
@@ -571,7 +583,7 @@ class UserController extends Controller
                 'permission_ids.*' => ['exists:permissions,id'],
             ]);
 
-            $permissions = \Spatie\Permission\Models\Permission::whereIn('id', $request->permission_ids)->get();
+            $permissions = Permission::whereIn('id', $request->permission_ids)->get();
             $user->givePermissionTo($permissions);
             $user->logPermissionToggle($permissions, 'given');
 
@@ -585,5 +597,18 @@ class UserController extends Controller
                 'message' => 'Erreur : '.$e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Seul un super-admin agit sur un compte super-admin ou attribue ce rôle :
+     * sans cela, un administrateur pourrait s'élever lui-même au rang de super-admin.
+     */
+    protected function protegerSuperAdmin(User $cible, ?Role $role = null): void
+    {
+        if (auth()->user()->hasRole('super-admin')) {
+            return;
+        }
+        abort_if($cible->hasRole('super-admin'), 403, 'Ce compte ne peut être modifié que par un super-administrateur.');
+        abort_if($role?->name === 'super-admin', 403, 'Seul un super-administrateur peut attribuer ou retirer ce rôle.');
     }
 }

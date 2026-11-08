@@ -3,7 +3,7 @@
 @section('header', 'En-tête des documents')
 
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('referentiel.parametres.index') }}">Paramètres</a></li>
+    <li class="breadcrumb-item"><a href="#">Administration</a></li>
     <li class="breadcrumb-item active" aria-current="page">En-tête des documents</li>
 @endsection
 
@@ -143,7 +143,6 @@
             </div>
 
             <div class="d-flex justify-content-end gap-2 mb-4">
-                <a href="{{ route('referentiel.parametres.index') }}" class="btn btn-outline-secondary">Retour aux paramètres</a>
                 <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Enregistrer</button>
             </div>
         </form>

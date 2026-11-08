@@ -11,6 +11,7 @@ return [
     'cores.users.destroy' => 'Supprimer un utilisateur',
     'cores.users.reset-password' => 'Réinitialiser le mot de passe',
     'cores.users.toggle-status' => 'Activer/Désactiver un utilisateur',
+    'cores.users.roles' => 'Attribuer ou retirer les rôles d\'un utilisateur',
 
     // Rôles
     'cores.roles.index' => 'Voir la liste des rôles',

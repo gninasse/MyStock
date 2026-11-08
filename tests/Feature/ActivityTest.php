@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Core\Models\Activity;
 use Modules\Core\Models\User;
+use Modules\Referentiel\Database\Seeders\RolesSeeder;
 use Tests\TestCase;
 
 class ActivityTest extends TestCase
@@ -15,8 +16,9 @@ class ActivityTest extends TestCase
     {
         parent::setUp();
 
-        // Créer un utilisateur et l'authentifier
-        $this->user = User::factory()->create();
+        // Le journal est réservé aux rôles qui en ont la permission (admin)
+        $this->seed(RolesSeeder::class);
+        $this->user = User::factory()->create()->assignRole('admin');
         $this->actingAs($this->user);
     }
 

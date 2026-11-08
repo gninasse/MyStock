@@ -41,7 +41,11 @@
                     </div>
                 </div>
                 <div class="col-auto">
-                    @if(auth()->id() !== $user->id)
+                    @php
+                        // Un compte super-admin n'est modifiable que par un super-admin
+                        $modifiable = ! $user->hasRole('super-admin') || auth()->user()->hasRole('super-admin');
+                    @endphp
+                    @if(auth()->id() !== $user->id && $modifiable && auth()->user()->can('cores.users.toggle-status'))
                         @if($user->is_active)
                             <button type="button" class="btn btn-outline-danger me-2" id="btn-toggle-status" data-action="désactiver">
                                 <i class="fas fa-user-slash"></i> Désactiver
@@ -52,12 +56,16 @@
                             </button>
                         @endif
                     @endif
+                    @if($modifiable && auth()->user()->can('cores.users.reset-password'))
                     <button type="button" class="btn btn-outline-secondary me-2" id="btn-reset-password">
                         <i class="fas fa-key"></i> Réinitialiser le mot de passe
                     </button>
+                    @endif
+                    @if($modifiable && auth()->user()->can('cores.users.update'))
                     <button type="button" class="btn btn-primary" id="btn-edit-mode">
                         <i class="fas fa-edit"></i> Modifier le profil
                     </button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -150,12 +158,14 @@
                                          style="width: 150px; height: 150px; object-fit: cover;" 
                                          alt="Avatar">
                                 </div>
+                                @if($modifiable && auth()->user()->can('cores.users.update'))
                                 <div class="mt-3">
                                     <label for="profile-avatar" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-camera"></i> Modifier la photo
                                     </label>
                                     <input type="file" id="profile-avatar" class="d-none" accept="image/*">
                                 </div>
+                                @endif
                             </div>
                             <div class="col-md-9">
                                 <div class="row">
@@ -285,9 +295,11 @@
                                    id="search-roles" 
                                    placeholder="Rechercher des rôles assignés...">
                         </div>
+                        @if($modifiable && auth()->user()->can('cores.users.roles'))
                         <button type="button" class="btn btn-primary" id="btn-assign-role">
                             <i class="fas fa-plus"></i> ASSIGNER UN NOUVEAU RÔLE
                         </button>
+                        @endif
                     </div>
 
                     @if($user->roles->count() > 0)
@@ -325,12 +337,14 @@
                                                 {{ $role->pivot->created_at ? $role->pivot->created_at->format('d/m/Y') : '-' }}
                                             </td>
                                             <td>
+                                                @if($modifiable && auth()->user()->can('cores.users.roles') && ($role->name !== 'super-admin' || auth()->user()->hasRole('super-admin')))
                                                 <button type="button" 
                                                         class="btn btn-sm btn-outline-danger btn-remove-role" 
                                                         data-role-id="{{ $role->id }}"
                                                         data-role-name="{{ $role->name }}">
                                                     <i class="fas fa-trash"></i> Retirer
                                                 </button>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -356,9 +370,11 @@
                                    id="search-direct-permissions" 
                                    placeholder="Rechercher des permissions directes...">
                         </div>
+                        @can('cores.permissions.toggle')
                         <button type="button" class="btn btn-primary" id="btn-assign-permissions">
                             <i class="fas fa-plus"></i> ASSIGNER DES PERMISSIONS DIRECTES
                         </button>
+                        @endcan
                     </div>
 
                     @if($user->getDirectPermissions()->count() > 0)
@@ -393,12 +409,14 @@
                                                 @endif
                                             </td>
                                             <td>
+                                                @can('cores.permissions.toggle')
                                                 <button type="button" 
                                                         class="btn btn-sm btn-outline-danger btn-remove-permission" 
                                                         data-permission-id="{{ $permission->id }}"
                                                         data-permission-name="{{ $permission->name }}">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
+                                                @endcan
                                             </td>
                                         </tr>
                                     @endforeach
