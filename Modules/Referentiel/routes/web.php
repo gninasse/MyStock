@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Referentiel\Http\Controllers\ArticleController;
 use Modules\Referentiel\Http\Controllers\ArticleFrequentController;
 use Modules\Referentiel\Http\Controllers\CategorieController;
+use Modules\Referentiel\Http\Controllers\EnteteController;
 use Modules\Referentiel\Http\Controllers\MagasinController;
 use Modules\Referentiel\Http\Controllers\ParametreController;
 use Modules\Referentiel\Http\Controllers\ResponsableMagasinController;
@@ -14,6 +15,13 @@ Route::middleware(['auth'])->prefix('referentiel')->name('referentiel.')->group(
     Route::middleware('permission:referentiel.parametres.gerer')->group(function () {
         Route::get('/parametres', [ParametreController::class, 'index'])->name('parametres.index');
         Route::put('/parametres', [ParametreController::class, 'update'])->name('parametres.update');
+
+        // En-tête officiel des documents PDF
+        Route::get('/parametres/en-tete', [EnteteController::class, 'edit'])->name('parametres.entete');
+        Route::put('/parametres/en-tete', [EnteteController::class, 'update'])->name('parametres.entete.update');
+        Route::get('/parametres/en-tete/apercu', [EnteteController::class, 'apercu'])->name('parametres.entete.apercu');
+        Route::post('/parametres/en-tete/images/{cle}', [EnteteController::class, 'image'])->name('parametres.entete.image');
+        Route::delete('/parametres/en-tete/images/{cle}', [EnteteController::class, 'supprimerImage'])->name('parametres.entete.image.supprimer');
     });
 
     // Magasins

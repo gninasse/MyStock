@@ -76,6 +76,29 @@ sortie, de transfert (signatures expéditeur, transporteur, destinataire), de r�
 réintégration ou d'ajustement. Un brouillon porte le filigrane BROUILLON, un mouvement
 annulé le filigrane ANNULÉ. Chaque impression est journalisée.
 
+### En-tête officiel des documents
+
+Tous les PDF (bons, fiche de comptage, procès-verbal, états, rapport d'activité) portent le
+même en-tête administratif, réglé par l'administrateur dans *Administration > En-tête des
+documents* :
+
+- **à gauche**, la hiérarchie administrative, du niveau le plus élevé au plus bas (ajouter,
+  retirer, monter ou descendre un niveau) ;
+- **à droite**, le nom de l'État et la devise (« BURKINA FASO — La Patrie ou la Mort, nous
+  Vaincrons ») ;
+- **les armoiries et le logo** de la structure (PNG ou JPEG, 1 Mo au plus), au centre ou
+  au-dessus de leur colonne. L'image est enregistrée dès qu'elle est choisie ;
+- **le libellé du document**, centré et encadré sous l'en-tête, suivi du numéro. Chaque
+  libellé (« Bon de transfert », « Procès-verbal d'inventaire »…) peut être renommé ; le
+  format du numéro accepte `{numero}` et `{annee}`, par exemple `N° {numero}/CHU-YO/DG` ;
+- **« Fait à Ouagadougou, le … »** au-dessus des signatures (date du mouvement ou de
+  l'inventaire ; en pointillés sur la fiche de comptage, remplie à la main) ;
+- **le pied de page** : adresse, boîte postale, téléphone, puis l'auteur et la date d'édition
+  et la pagination.
+
+L'aperçu à droite de l'écran suit la saisie ; « Aperçu PDF » montre un bon d'exemple avec
+l'en-tête enregistré. Chaque modification est journalisée.
+
 ## États
 
 Stock par magasin, stock par catégorie, journal des mouvements, fiche de stock, transferts,

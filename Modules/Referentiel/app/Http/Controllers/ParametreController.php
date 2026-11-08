@@ -13,7 +13,8 @@ class ParametreController extends Controller
     public function index()
     {
         return view('referentiel::parametres.index', [
-            'groupes' => collect($this->parametres->definitions())->groupBy('groupe', true),
+            // Les paramètres d'un écran dédié (en-tête des documents) n'apparaissent pas ici
+            'groupes' => collect($this->parametres->definitions())->whereNull('ecran')->groupBy('groupe', true),
             'valeurs' => $this->parametres->toutes(),
         ]);
     }
@@ -21,8 +22,9 @@ class ParametreController extends Controller
     public function update(Request $request)
     {
         $definitions = $this->parametres->definitions();
+        $generales = collect($definitions)->whereNull('ecran');
         $donnees = $request->validate(
-            $this->parametres->regles(),
+            array_intersect_key($this->parametres->regles(), $generales->all()),
             [],
             collect($definitions)->map(fn ($d) => mb_strtolower($d['libelle']))->all()
         );

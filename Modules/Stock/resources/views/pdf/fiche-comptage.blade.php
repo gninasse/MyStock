@@ -5,7 +5,7 @@
     $colonnes = 6 + ($avecTheorique ? 1 : 0);
 @endphp
 
-@section('titre', 'Fiche de comptage')
+@section('titre', app(\Modules\Referentiel\Services\EnteteDocuments::class)->libelle('FICHE_COMPTAGE'))
 @section('sous-titre', $magasin->libelle.' ('.$magasin->code.')')
 @section('pied', 'Fiche de comptage '.$magasin->code)
 
@@ -82,6 +82,7 @@
         </tbody>
     </table>
 
+    @include('core::pdf.partials.fait-a', ['aRemplir' => true])
     <table class="signatures">
         <tr>
             <td class="case" style="width: 32%"><div class="role">Compté par</div><div class="ligne">Nom, date et signature</div></td>

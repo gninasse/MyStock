@@ -9,7 +9,7 @@
     $t = $kpi['transferts'];
 @endphp
 
-@section('titre', "Rapport d'activité")
+@section('titre', app(\Modules\Referentiel\Services\EnteteDocuments::class)->libelle('RAPPORT_ACTIVITE'))
 @section('sous-titre', $stats['periode']['libelle'].' · du '.$stats['periode']['du'].' au '.$stats['periode']['au'])
 @section('pied', "Rapport d'activité")
 

@@ -17,12 +17,18 @@ Le guide d'utilisation est dans [docs/GUIDE.md](docs/GUIDE.md).
 
 | Paramètre | Effet | Défaut |
 | --- | --- | --- |
-| Nom de l'organisation | En-tête des états PDF | CHU-YO |
+| Nom de l'organisation | Sigle du pied de page des PDF | CHU-YO |
 | Ancienneté maximale d'un mouvement | Nombre de jours de rétroactivité autorisés | 7 |
 | Déroulement d'un transfert | `DEUX_ETAPES` (expédition puis réception), `UNE_ETAPE`, ou `UNE_ETAPE_SI_ACCES` (une étape si l'expéditeur peut aussi réceptionner au magasin destinataire) | Deux étapes |
 | Quantité expédiée mais non reçue | Réintégrée au magasin source, ou comptée comme perte en transit | Réintégrée |
 | Suivi des lots | Saisie n° de lot / péremption à l'entrée, sorties en FEFO | Désactivé |
 | Alerte de péremption | Délai (jours) avant péremption pour l'alerte | 90 |
+
+**En-tête des documents** (Administration > En-tête des documents) : en-tête administratif officiel commun à tous les PDF.
+Hiérarchie administrative à gauche (Ministère de la Santé › Secrétariat général › CHU Yalgado Ouédraogo › Direction générale),
+« BURKINA FASO » et la devise à droite, armoiries et logo (PNG/JPEG) au centre ou au-dessus de chaque colonne, libellé du
+document centré, format du numéro (`N° {numero}/CHU-YO/DG`), « Fait à Ouagadougou, le … » au-dessus des signatures et
+mentions du pied de page. Les libellés des bons, fiches, PV et rapport sont renommables. Bouton « Aperçu PDF » sur l'écran.
 
 ---
 

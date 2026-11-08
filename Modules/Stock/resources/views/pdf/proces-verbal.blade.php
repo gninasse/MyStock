@@ -9,7 +9,7 @@
     $formater = fn ($n) => number_format($n, 0, ',', ' ');
 @endphp
 
-@section('titre', "Procès-verbal d'inventaire")
+@section('titre', app(\Modules\Referentiel\Services\EnteteDocuments::class)->libelle('PV_INVENTAIRE'))
 @section('sous-titre', $inventaire->magasin->libelle.' · '.$inventaire->date_inventaire->format('d/m/Y'))
 @section('pied', 'PV d\'inventaire '.$inventaire->magasin->code.' du '.$inventaire->date_inventaire->format('d/m/Y'))
 
@@ -85,6 +85,7 @@
         <p class="muet" style="margin-top: 6px">{{ $sansEcart }} article(s) compté(s) sans écart ne figurent pas dans ce tableau.</p>
     @endif
 
+    @include('core::pdf.partials.fait-a', ['date' => $inventaire->date_inventaire])
     <table class="signatures">
         <tr>
             <td class="case" style="width: 32%"><div class="role">La commission d'inventaire</div><div class="ligne">Noms et signatures</div></td>

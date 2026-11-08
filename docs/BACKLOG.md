@@ -68,3 +68,11 @@ Une tâche par itération de la boucle de développement : implémenter, tester
 - [x] 13. **Statistiques** : page de pilotage (indicateurs, évolution mensuelle des
       mouvements, articles les plus consommés, consommation par service, stock par
       catégorie, performance des transferts) filtrable par période et magasin.
+
+## Lot 6 — En-tête officiel des documents (CHU-YO, Burkina Faso)
+
+- [x] 14. **En-tête administratif paramétrable** commun à tous les PDF : hiérarchie
+      (Ministère de la Santé › Secrétariat général › CHU-YO › Direction générale), État et
+      devise, armoiries et logo (base64, sans appel réseau), libellé du document centré et
+      renommable, format du numéro, « Fait à Ouagadougou, le … », pied de page. Écran
+      « Administration > En-tête des documents » avec aperçu en direct et aperçu PDF.

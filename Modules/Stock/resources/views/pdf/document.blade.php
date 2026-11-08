@@ -3,10 +3,8 @@
 @use('Modules\Stock\Models\Document')
 @php
     $type = $document->type;
-    $titres = [
-        Document::ENTREE => "Bon d'entrée", Document::SORTIE => 'Bon de sortie', Document::TRANSFERT => 'Bon de transfert',
-        Document::RECEPTION => 'Bon de réception', Document::REINTEGRATION => 'Bon de réintégration', Document::AJUSTEMENT => "Bon d'ajustement d'inventaire",
-    ];
+    $entete = app(\Modules\Referentiel\Services\EnteteDocuments::class);
+    $libelle = $entete->libelle($type, config("referentiel.documents.{$type}", $document->libelle_type));
     $statuts = Document::STATUTS;
     if ($type === Document::TRANSFERT && $document->statut === Document::VALIDE) {
         $statuts[Document::VALIDE] = ['Reçu'];
@@ -26,11 +24,12 @@
     $magasinBloc = fn ($m) => $m ? $m->libelle : '—';
 @endphp
 
-@section('titre', $titres[$type] ?? $document->libelle_type)
+@section('titre', $libelle)
+@section('reference', $entete->reference($document->reference))
 @section('sous-titre')
-    N° {{ $document->reference ?? 'non attribué' }} &nbsp;<span class="pastille {{ $document->statut }}">{{ $statuts[$document->statut][0] ?? $document->statut }}</span>
+    <span class="pastille {{ $document->statut }}">{{ $statuts[$document->statut][0] ?? $document->statut }}</span>
 @endsection
-@section('pied', ($titres[$type] ?? '').' '.($document->reference ?? ''))
+@section('pied', trim($libelle.' '.($document->reference ?? '')))
 
 @section('contenu')
     <table class="infos">
@@ -166,6 +165,7 @@
         <div class="note"><b>Motif de l'écart :</b> {{ $document->motif_ecart }}</div>
     @endif
 
+    @include('core::pdf.partials.fait-a', ['date' => $document->date_mouvement])
     <table class="signatures">
         <tr>
             @foreach ($signatures as [$role, $ligne])

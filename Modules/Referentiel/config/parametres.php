@@ -8,7 +8,7 @@ return [
     'organisation_nom' => [
         'groupe' => 'Général',
         'libelle' => 'Nom de l\'organisation',
-        'aide' => 'Affiché dans l\'en-tête des états PDF.',
+        'aide' => 'Sigle repris dans le pied de page des documents PDF. L\'en-tête officiel se règle dans « En-tête des documents ».',
         'type' => 'texte',
         'max' => 100,
         'defaut' => 'CHU-YO',
@@ -60,5 +60,83 @@ return [
         'min' => 1,
         'max' => 730,
         'defaut' => 90,
+    ],
+
+    /*
+     * En-tête officiel des documents PDF (écran Administration > En-tête des documents).
+     * « ecran » les retire de l'écran général des paramètres.
+     */
+    'entete_etat' => [
+        'groupe' => 'En-tête des documents', 'ecran' => 'entete',
+        'libelle' => 'Nom de l\'État',
+        'type' => 'texte', 'max' => 80,
+        'defaut' => 'BURKINA FASO',
+    ],
+    'entete_devise' => [
+        'groupe' => 'En-tête des documents', 'ecran' => 'entete',
+        'libelle' => 'Devise nationale',
+        'type' => 'texte', 'max' => 120,
+        'defaut' => 'La Patrie ou la Mort, nous Vaincrons',
+    ],
+    'entete_hierarchie' => [
+        'groupe' => 'En-tête des documents', 'ecran' => 'entete',
+        'libelle' => 'Hiérarchie administrative',
+        'type' => 'json', 'max' => 8, 'max_element' => 120,
+        'defaut' => [
+            'MINISTÈRE DE LA SANTÉ',
+            'SECRÉTARIAT GÉNÉRAL',
+            'CENTRE HOSPITALIER UNIVERSITAIRE YALGADO OUÉDRAOGO',
+            'DIRECTION GÉNÉRALE',
+        ],
+    ],
+    'entete_armoiries' => [
+        'groupe' => 'En-tête des documents', 'ecran' => 'entete',
+        'libelle' => 'Armoiries ou emblème national',
+        'type' => 'image',
+        'defaut' => null,
+    ],
+    'entete_armoiries_position' => [
+        'groupe' => 'En-tête des documents', 'ecran' => 'entete',
+        'libelle' => 'Position des armoiries',
+        'type' => 'choix',
+        'choix' => ['CENTRE' => 'Au centre', 'DROITE' => 'Au-dessus du nom de l\'État'],
+        'defaut' => 'DROITE',
+    ],
+    'entete_logo' => [
+        'groupe' => 'En-tête des documents', 'ecran' => 'entete',
+        'libelle' => 'Logo de la structure',
+        'type' => 'image',
+        'defaut' => null,
+    ],
+    'entete_logo_position' => [
+        'groupe' => 'En-tête des documents', 'ecran' => 'entete',
+        'libelle' => 'Position du logo',
+        'type' => 'choix',
+        'choix' => ['GAUCHE' => 'Au-dessus de la hiérarchie', 'CENTRE' => 'Au centre'],
+        'defaut' => 'CENTRE',
+    ],
+    'entete_lieu' => [
+        'groupe' => 'En-tête des documents', 'ecran' => 'entete',
+        'libelle' => 'Lieu de signature',
+        'type' => 'texte', 'max' => 60,
+        'defaut' => 'Ouagadougou',
+    ],
+    'entete_reference' => [
+        'groupe' => 'En-tête des documents', 'ecran' => 'entete',
+        'libelle' => 'Format du numéro des bons',
+        'type' => 'texte', 'max' => 80,
+        'defaut' => 'N° {numero}',
+    ],
+    'entete_pied' => [
+        'groupe' => 'En-tête des documents', 'ecran' => 'entete',
+        'libelle' => 'Mentions du pied de page',
+        'type' => 'texte', 'max' => 200,
+        'defaut' => 'Centre Hospitalier Universitaire Yalgado Ouédraogo · Ouagadougou',
+    ],
+    'entete_libelles' => [
+        'groupe' => 'En-tête des documents', 'ecran' => 'entete',
+        'libelle' => 'Libellés des documents',
+        'type' => 'json', 'max' => 30, 'max_element' => 80,
+        'defaut' => [],
     ],
 ];

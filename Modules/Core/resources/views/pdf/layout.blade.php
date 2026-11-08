@@ -1,31 +1,51 @@
 {{--
     Gabarit commun des imprimés et états PDF (DomPDF).
-    Sections : titre, sous-titre (référence), statut (pastille), contenu.
-    Variables facultatives : $filigrane (BROUILLON, ANNULÉ…), $paysage (bool).
+    En-tête administratif officiel (paramétrable dans Administration > En-tête des documents) :
+    hiérarchie à gauche, armoiries/logo au centre, État et devise à droite, puis le libellé
+    du document centré. Sections : titre (libellé), reference (N°), sous-titre, pied, contenu.
+    Variables facultatives : $filigrane (BROUILLON, ANNULÉ…).
 --}}
+@php
+    $enteteOfficiel = app(\Modules\Referentiel\Services\EnteteDocuments::class)->donnees();
+    $armoiriesAuCentre = $enteteOfficiel['armoiries'] && $enteteOfficiel['armoiries_position'] === 'CENTRE';
+    $logoAuCentre = $enteteOfficiel['logo'] && $enteteOfficiel['logo_position'] === 'CENTRE';
+@endphp
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="utf-8">
     <title>@yield('titre')</title>
     <style>
-        @page { margin: 92px 34px 52px 34px; }
+        @page { margin: 30px 34px 56px 34px; }
         * { box-sizing: border-box; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 8.6px; color: #1f2933; line-height: 1.35; }
 
-        /* En-tête et pied répétés sur chaque page */
-        .entete { position: fixed; top: -74px; left: 0; right: 0; height: 60px; }
-        .entete table { width: 100%; border-collapse: collapse; }
-        .entete td { vertical-align: top; padding: 0; }
-        .entete .logo { width: 40px; }
-        .entete .logo img { width: 32px; height: 32px; }
-        .entete .organisation { font-size: 11px; font-weight: bold; color: #1f2933; }
-        .entete .application { font-size: 7.5px; color: #6b7682; letter-spacing: .4px; text-transform: uppercase; }
-        .entete .document { text-align: right; }
-        .entete .document .titre { font-size: 14px; font-weight: bold; color: #1f2933; }
-        .entete .document .reference { font-size: 9px; color: #3b4651; margin-top: 2px; }
-        .entete .filet { height: 3px; background: #1f4e79; margin-top: 8px; }
-        .pied { position: fixed; bottom: -38px; left: 0; right: 90px; height: 20px; font-size: 7px; color: #737b85; border-top: .6px solid #d5dbe1; padding-top: 5px; }
+        /* En-tête administratif (première page) */
+        table.entete-officielle { width: 100%; border-collapse: collapse; }
+        table.entete-officielle td { vertical-align: top; padding: 0; text-align: center; color: #000; }
+        table.entete-officielle td.hierarchie { width: 42%; }
+        table.entete-officielle td.centre { width: 16%; vertical-align: middle; }
+        table.entete-officielle td.etat { width: 42%; }
+        .entete-officielle .niveau { font-size: 7.6px; font-weight: bold; text-transform: uppercase; line-height: 1.3; }
+        .entete-officielle .tiret { width: 34px; margin: 2.5px auto; border-top: .8px solid #000; }
+        .entete-officielle .nom-etat { font-size: 10.5px; font-weight: bold; text-transform: uppercase; letter-spacing: .6px; }
+        .entete-officielle .devise { font-size: 7.8px; font-style: italic; }
+        .entete-officielle img.armoiries { height: 52px; margin-bottom: 4px; }
+        .entete-officielle img.logo { height: 44px; margin-bottom: 4px; }
+        .entete-officielle td.centre img { margin: 0 3px; }
+
+        /* Libellé du document, centré */
+        .titre-document { text-align: center; margin: 14px 0 12px; }
+        .titre-document table.cadre { margin: 0 auto; border-collapse: collapse; }
+        .titre-document table.cadre td { border-top: 1.4px solid #000; border-bottom: 1.4px solid #000; padding: 4px 18px; }
+        .titre-document .libelle { font-size: 13.5px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #000; }
+        .titre-document .reference { font-size: 9.5px; font-weight: bold; color: #000; margin-top: 5px; }
+        .titre-document .sous-titre { font-size: 8.4px; color: #3b4651; margin-top: 2px; }
+
+        .fait-a { text-align: right; margin-top: 18px; font-size: 8.6px; color: #000; page-break-after: avoid; }
+
+        .pied { position: fixed; bottom: -40px; left: 90px; right: 90px; height: 24px; font-size: 6.8px; color: #5c6670; border-top: .6px solid #c9d0d7; padding-top: 4px; text-align: center; }
+        .pied .mentions { color: #1f2933; }
 
         .pastille { display: inline-block; padding: 1.5px 6px; border-radius: 8px; font-size: 7px; font-weight: bold; color: #fff; background: #6b7682; }
         .pastille.VALIDE { background: #1f7a4d; } .pastille.EN_TRANSIT { background: #c48a00; }
@@ -76,25 +96,43 @@
     @stack('styles')
 </head>
 <body>
-    <div class="entete">
-        <table>
-            <tr>
-                <td class="logo"><img src="{{ public_path('adminlte/assets/img/AdminLTELogo.png') }}" alt=""></td>
-                <td>
-                    <div class="organisation">{{ \Modules\Referentiel\Services\Parametres::get('organisation_nom') }}</div>
-                    <div class="application">{{ config('app.name') }} · Gestion des stocks</div>
-                </td>
-                <td class="document">
-                    <div class="titre">@yield('titre')</div>
-                    <div class="reference">@yield('sous-titre')</div>
-                </td>
-            </tr>
-        </table>
-        <div class="filet"></div>
+    <div class="pied">
+        @if ($enteteOfficiel['pied'])<div class="mentions">{{ $enteteOfficiel['pied'] }}</div>@endif
+        Édité le {{ now()->format('d/m/Y à H:i') }} par {{ auth()->user()?->full_name ?? '—' }} · {{ \Modules\Referentiel\Services\Parametres::get('organisation_nom') }} · {{ config('app.name') }}@hasSection('pied') · @yield('pied')@endif
     </div>
 
-    <div class="pied">
-        Édité le {{ now()->format('d/m/Y à H:i') }} par {{ auth()->user()?->full_name ?? '—' }} · @yield('pied', config('app.name'))
+    <table class="entete-officielle">
+        <tr>
+            <td class="hierarchie">
+                @if ($enteteOfficiel['logo'] && $enteteOfficiel['logo_position'] === 'GAUCHE')
+                    <img class="logo" src="{{ $enteteOfficiel['logo'] }}" alt=""><br>
+                @endif
+                @foreach ($enteteOfficiel['hierarchie'] as $niveau)
+                    <div class="niveau">{{ $niveau }}</div>
+                    @unless ($loop->last)<div class="tiret"></div>@endunless
+                @endforeach
+            </td>
+            <td class="centre">
+                @if ($armoiriesAuCentre)<img class="armoiries" src="{{ $enteteOfficiel['armoiries'] }}" alt="">@endif
+                @if ($logoAuCentre)<img class="logo" src="{{ $enteteOfficiel['logo'] }}" alt="">@endif
+            </td>
+            <td class="etat">
+                @if ($enteteOfficiel['armoiries'] && $enteteOfficiel['armoiries_position'] === 'DROITE')
+                    <img class="armoiries" src="{{ $enteteOfficiel['armoiries'] }}" alt=""><br>
+                @endif
+                <div class="nom-etat">{{ $enteteOfficiel['etat'] }}</div>
+                @if ($enteteOfficiel['devise'])
+                    <div class="tiret"></div>
+                    <div class="devise">{{ $enteteOfficiel['devise'] }}</div>
+                @endif
+            </td>
+        </tr>
+    </table>
+
+    <div class="titre-document">
+        <table class="cadre"><tr><td><div class="libelle">@yield('titre')</div></td></tr></table>
+        @hasSection('reference')<div class="reference">@yield('reference')</div>@endif
+        @hasSection('sous-titre')<div class="sous-titre">@yield('sous-titre')</div>@endif
     </div>
 
     @if (! empty($filigrane))

@@ -67,9 +67,15 @@
                   @endcan
                   @can('referentiel.parametres.gerer')
                   <li class="nav-item">
-                    <a href="{{ route('referentiel.parametres.index') }}" class="nav-link {{ request()->routeIs('referentiel.parametres.*') ? 'active' : '' }}">
+                    <a href="{{ route('referentiel.parametres.index') }}" class="nav-link {{ request()->routeIs('referentiel.parametres.index') ? 'active' : '' }}">
                       <i class="nav-icon bi bi-sliders"></i>
                       <p>Paramètres</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="{{ route('referentiel.parametres.entete') }}" class="nav-link {{ request()->routeIs('referentiel.parametres.entete*') ? 'active' : '' }}">
+                      <i class="nav-icon bi bi-file-earmark-richtext"></i>
+                      <p>En-tête des documents</p>
                     </a>
                   </li>
                   @endcan
