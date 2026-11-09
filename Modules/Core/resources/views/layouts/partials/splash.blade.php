@@ -15,7 +15,7 @@
         background: #f4f6f9; color: #1f2d3d; font-family: "Source Sans 3", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
         transition: opacity .35s ease, visibility .35s ease; }
     #splash.splash-cache { opacity: 0; visibility: hidden; pointer-events: none; }
-    #splash .splash-logo { width: 76px; height: 76px; border-radius: 20px; display: grid; place-items: center; background: #0d6efd; color: #fff;
+    #splash .splash-logo { width: 76px; height: 76px; border-radius: 18px; background: #0d6efd;
         box-shadow: 0 10px 30px rgba(13, 110, 253, .28); animation: splash-pulse 1.6s ease-in-out infinite; }
     #splash .splash-nom { font-size: 1.6rem; font-weight: 700; letter-spacing: .08em; line-height: 1; }
     #splash .splash-nom span { color: #0d6efd; }
@@ -33,11 +33,7 @@
     }
 </style>
 <div id="splash" role="status" aria-live="polite" aria-label="Chargement de MyStock">
-    <div class="splash-logo" aria-hidden="true">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/><path d="M7.5 5.5l9 5"/>
-        </svg>
-    </div>
+    <img class="splash-logo" src="{{ asset('brand/logo.svg') }}" alt="" width="76" height="76">
     <div class="splash-nom">MY<span>STOCK</span></div>
     @if ($splashOrganisation)
         <div class="splash-org">{{ $splashOrganisation }}</div>

@@ -3,30 +3,13 @@
   <!--begin::Head-->
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>@yield('title', 'CHU-YO-MYSTOCK')</title>
+    {{-- Onglet : titre de la page (ou son en-tête) suivi du nom de l'application. --}}
+    <title>{!! trim(strip_tags($__env->yieldContent('title') ?: $__env->yieldContent('header', 'Tableau de bord'))) !!} · {{ config('app.name') }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <!--begin::Accessibility Meta Tags-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
-    <!--end::Accessibility Meta Tags-->
-    <!--begin::Primary Meta Tags-->
-    <meta name="title" content="CHU-YO-MYSTOCK" />
-    <meta name="author" content="ibrahim" />
-    <meta
-      name="description"
-      content="CHU-YO-MYSTOCK"
-    />
-    <meta
-      name="keywords"
-      content="CHU-YO-MYSTOCK"
-    />
-    <!--end::Primary Meta Tags-->
-    <!--begin::Accessibility Features-->
-    <!-- Skip links will be dynamically added by accessibility.js -->
     <meta name="supported-color-schemes" content="light dark" />
-    <!--end::Accessibility Features-->
+    @include('core::layouts.partials.head-meta')
     <!--begin::Fonts-->
     <link
       rel="stylesheet"
@@ -109,17 +92,10 @@
       </main>
       <!--end::App Main-->
       <!--begin::Footer-->
-      <footer class="app-footer">
-        <!--begin::To the end-->
-        <div class="float-end d-none d-sm-inline">CHU-YO</div>
-        <!--end::To the end-->
-        <!--begin::Copyright-->
-        <strong>
-          Copyright &copy; 2025&nbsp;
-          <a href="#" class="text-decoration-none">CHU-YO</a>.
-        </strong>
-        tous droits reservés.
-        <!--end::Copyright-->
+      <footer class="app-footer small">
+        <div class="float-end d-none d-sm-inline text-body-secondary">{{ config('app.name') }} v{{ config('app.version') }}</div>
+        <strong>&copy; {{ now()->year }} {{ \Modules\Referentiel\Services\Parametres::get('organisation_nom') }}</strong>
+        <span class="text-body-secondary">· {{ config('app.organisation') }} · Ouagadougou, Burkina Faso</span>
       </footer>
       <!--end::Footer-->
     </div>

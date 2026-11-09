@@ -13,7 +13,7 @@
     $alertes = $kpi['alertes'];
 @endphp
 
-@section('title', 'Statistiques · MyStock')
+@section('title', 'Statistiques')
 @section('header', 'Statistiques')
 
 @section('breadcrumb')

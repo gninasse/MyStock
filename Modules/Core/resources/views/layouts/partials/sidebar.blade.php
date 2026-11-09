@@ -3,17 +3,9 @@
         <!--begin::Sidebar Brand-->
         <div class="sidebar-brand">
           <!--begin::Brand Link-->
-          <a href="{{ url('/') }}" class="brand-link">
-            <!--begin::Brand Image-->
-            <img
-              src="{{ asset('adminlte/assets/img/AdminLTELogo.png') }}"
-              alt="AdminLTE Logo"
-              class="brand-image opacity-75 shadow"
-            />
-            <!--end::Brand Image-->
-            <!--begin::Brand Text-->
-            <span class="brand-text fw-light">CHU-YO</span>
-            <!--end::Brand Text-->
+          <a href="{{ url('/') }}" class="brand-link" title="{{ config('app.name') }} · {{ config('app.organisation') }}">
+            <img src="{{ asset('brand/logo.svg') }}" alt="" class="brand-image" width="33" height="33" />
+            <span class="brand-text fw-semibold">My<span class="text-primary-emphasis">Stock</span></span>
           </a>
           <!--end::Brand Link-->
         </div>

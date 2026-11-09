@@ -84,3 +84,14 @@ Une tâche par itération de la boucle de développement : implémenter, tester
       permission « Attribuer les rôles d'un utilisateur » et « Gérer l'en-tête des
       documents », rôle super-admin déclaré dans la matrice et protégé contre l'admin,
       test qui refuse toute nouvelle route sans contrôle d'accès.
+
+## Lot 8 — Identité et finitions professionnelles
+
+- [x] Écran de démarrage sur toutes les pages (logo, sigle, barre de chargement, fondu).
+- [x] Logo MyStock (`public/brand/logo.svg`), favicons ICO/SVG/PNG, icône Apple,
+      icônes 192/512 et « maskable », manifeste `site.webmanifest` (installation sur mobile).
+- [x] Titres d'onglet « Page · MyStock », métadonnées communes (`core::layouts.partials.head-meta`).
+- [x] Barre latérale au logo MyStock, pied de page avec année courante et version (`APP_VERSION`).
+- [x] Page de connexion refaite (panneau d'identité CHU-YO, champs libellés, afficher le mot de passe).
+- [x] Pages d'erreur en français (401, 403, 404, 405, 419, 429, 500, 503), sans accès base.
+- [x] En-têtes de sécurité HTTP (`App\Http\Middleware\EntetesSecurite`) et `robots.txt` fermé.

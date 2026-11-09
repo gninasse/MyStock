@@ -16,6 +16,13 @@ return [
     'name' => env('APP_NAME', 'Laravel'),
 
     /*
+    | Version affichée dans le pied de page et sur la page de connexion.
+    */
+    'version' => env('APP_VERSION', '2.2.0'),
+
+    'organisation' => 'Centre Hospitalier Universitaire Yalgado Ouédraogo',
+
+    /*
     |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
