@@ -69,6 +69,7 @@
   <!--end::Head-->
   <!--begin::Body-->
   <body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
+    @include('core::layouts.partials.splash')
     <!--begin::App Wrapper-->
     <div class="app-wrapper">
       

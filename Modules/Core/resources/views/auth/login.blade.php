@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ asset('adminlte/css/adminlte.css') }}">
 </head>
 <body class="login-page bg-body-secondary">
+    @include('core::layouts.partials.splash')
 <div class="login-box">
     <div class="card card-outline card-primary">
         <div class="card-header text-center">
