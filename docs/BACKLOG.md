@@ -95,3 +95,9 @@ Une tâche par itération de la boucle de développement : implémenter, tester
 - [x] Page de connexion refaite (panneau d'identité CHU-YO, champs libellés, afficher le mot de passe).
 - [x] Pages d'erreur en français (401, 403, 404, 405, 419, 429, 500, 503), sans accès base.
 - [x] En-têtes de sécurité HTTP (`App\Http\Middleware\EntetesSecurite`) et `robots.txt` fermé.
+
+---
+
+## Projet dérivé : IkkaPharma
+
+Le socle MyStock sert de base à IkkaPharma (gestion d'officine : stock, facturation, caisse). Spécification : [IKKAPHARMA-SPEC.md](IKKAPHARMA-SPEC.md).
