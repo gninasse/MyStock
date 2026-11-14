@@ -98,6 +98,8 @@ Une tâche par itération de la boucle de développement : implémenter, tester
 
 ---
 
-## Projet dérivé : IkkaPharma
+## Projets dérivés : IkkaPharma et IkkaCommerce
 
 Le socle MyStock sert de base à IkkaPharma (gestion d'officine : stock, facturation, caisse). Spécification : [IKKAPHARMA-SPEC.md](IKKAPHARMA-SPEC.md).
+
+Le même socle, complété d'un moteur commercial commun, sert à IkkaCommerce (boutiques de gros et de détail paramétrables). Spécification : [IKKACOMMERCE-SPEC.md](IKKACOMMERCE-SPEC.md).
